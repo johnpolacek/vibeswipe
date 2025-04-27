@@ -36,10 +36,7 @@ export function ExploreView() {
     return (
       <div className="container px-4 py-12 md:px-6 md:py-24">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl mb-4">
-            Loading <span className="text-primary">Ideas</span>
-          </h1>
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -8,6 +8,10 @@ import { Check, X } from "lucide-react"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import type { StartupIdea } from "@/lib/data"
+import { getGradient } from "@/lib/utils"
+import { saveIdeaSwipe } from "@/app/_actions/save-idea-swipe"
+import { useUser } from "@clerk/nextjs"
+import { getUserSwipedIdeaIds } from "@/lib/services/visits"
 
 interface IdeaCarouselProps {
   ideas: StartupIdea[]
@@ -15,40 +19,75 @@ interface IdeaCarouselProps {
   onClose: () => void
 }
 
-function seededRandom(str: string) {
-  // Simple hash for deterministic random
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return Math.abs(hash) / 2147483647
-}
-
 export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [liked, setLiked] = useState<string[]>([])
   const [saved, setSaved] = useState<string[]>([])
   const [exitX, setExitX] = useState<number | null>(null)
+  const [unratedIdeas, setUnratedIdeas] = useState<StartupIdea[]>([])
+  const [loading, setLoading] = useState(true)
+  const { user } = useUser()
 
-  const currentIdea = ideas[currentIndex]
+  useEffect(() => {
+    async function fetchUnrated() {
+      if (!user) {
+        setUnratedIdeas([])
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      try {
+        const swipedIds = await getUserSwipedIdeaIds(user.id)
+        const filtered = ideas.filter((idea) => !swipedIds.includes(idea.id))
+        setUnratedIdeas(filtered)
+        setCurrentIndex(0)
+        setLoading(false)
+      } catch (err) {
+        setUnratedIdeas([])
+        setLoading(false)
+      }
+    }
+    fetchUnrated()
+  }, [user, ideas])
+
+  const currentIdea = unratedIdeas[currentIndex]
 
   // Handle like/dislike actions
-  const handleAction = (action: "like" | "dislike") => {
-    if (currentIndex < ideas.length - 1) {
+  const handleAction = async (action: "like" | "dislike") => {
+    if (!user) return // Optionally, show sign-in prompt
+    if (currentIndex < unratedIdeas.length - 1) {
       if (action === "like") {
         setLiked([...liked, currentIdea.id])
         setExitX(500)
       } else {
         setExitX(-500)
       }
-
+      // Save swipe
+      try {
+        const args = {
+          userId: user.id,
+          ideaId: currentIdea.id,
+          liked: action === "like",
+          createdAt: Date.now(),
+        }
+        const result = await saveIdeaSwipe(args)
+      } catch (err) {}
       // Move to next idea after a short delay
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1)
         setExitX(null)
       }, 300)
     } else {
-      // End of ideas
+      // Last idea: save swipe and close
+      try {
+        const args = {
+          userId: user.id,
+          ideaId: currentIdea.id,
+          liked: action === "like",
+          createdAt: Date.now(),
+        }
+        const result = await saveIdeaSwipe(args)
+      } catch (err) {}
       onClose()
     }
   }
@@ -71,31 +110,17 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
     }
   }
 
-  // Generate a random gradient based on the idea's id
-  const getGradient = (id: string) => {
-    const gradients = [
-      "from-pink-500 to-purple-500",
-      "from-blue-500 to-teal-500",
-      "from-green-500 to-emerald-500",
-      "from-yellow-500 to-orange-500",
-      "from-purple-500 to-indigo-500",
-      "from-red-500 to-pink-500",
-      "from-fuchsia-500 to-cyan-500",
-      "from-lime-500 to-green-700",
-      "from-amber-500 to-orange-700",
-      "from-sky-500 to-blue-700",
-    ]
-    const rand = seededRandom(id)
-    return gradients[Math.floor(rand * gradients.length)]
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent hideClose={true} className="sm:max-w-md p-0 h-[90vh] max-h-[800px] flex flex-col gap-0 overflow-hidden">
         <VisuallyHidden.Root>
           <DialogTitle>Startup Ideas</DialogTitle>
         </VisuallyHidden.Root>
-        {currentIndex < ideas.length ? (
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center p-6">
+            <div className="sr-only">Loading...</div>
+          </div>
+        ) : currentIndex < unratedIdeas.length ? (
           <div className="flex-1 overflow-hidden relative">
             <AnimatePresence mode="wait">
               <motion.div
@@ -150,14 +175,14 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">You&apos;ve seen all ideas!</h3>
               <p className="text-gray-600 mb-4">Check back later for more or submit your own.</p>
-              <Button onClick={() => setCurrentIndex(0)} className="bg-primary hover:bg-primary/90">
-                Start Over
+              <Button size="lg" onClick={onClose} className="bg-primary hover:bg-primary/90">
+                Close
               </Button>
             </div>
           </div>
         )}
 
-        {currentIndex < ideas.length && (
+        {currentIndex < unratedIdeas.length && !loading && (
           <div className="flex justify-center gap-8 py-8 border-t border-white/30 bg-black">
             <Button variant="outline" size="icon" className="rounded-full h-16 w-16 border-2 border-red-500 text-red-500 hover:scale-105" onClick={() => handleAction("dislike")}>
               <X className="scale-150" size={32} />

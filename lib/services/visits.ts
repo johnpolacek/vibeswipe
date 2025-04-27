@@ -30,4 +30,17 @@ export async function getVisitsByPath(path: string, limit?: number) {
  */
 export async function getAllVisits(limit?: number) {
   return await convex.query(api.visits.getVisits, { limit });
+}
+
+export async function recordIdeaSwipe(data: {
+  ideaId: string;
+  userId: string;
+  liked: boolean;
+  createdAt: number;
+}) {
+  return await convex.mutation(api.ideas.recordSwipe, data);
+}
+
+export async function getUserSwipedIdeaIds(userId: string) {
+  return await convex.query(api.ideas.getUserSwipedIdeaIds, { userId });
 } 
