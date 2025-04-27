@@ -7597,7 +7597,6 @@ interface IdeaCarouselProps {
 export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [liked, setLiked] = useState<string[]>([])
-  const [saved, setSaved] = useState<string[]>([])
   const [exitX, setExitX] = useState<number | null>(null)
   const [unratedIdeas, setUnratedIdeas] = useState<StartupIdea[]>([])
   const [loading, setLoading] = useState(true)
@@ -7617,7 +7616,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
         setUnratedIdeas(filtered)
         setCurrentIndex(0)
         setLoading(false)
-      } catch (err) {
+      } catch {
         setUnratedIdeas([])
         setLoading(false)
       }
@@ -7645,8 +7644,8 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
           liked: action === "like",
           createdAt: Date.now(),
         }
-        const result = await saveIdeaSwipe(args)
-      } catch (err) {}
+        await saveIdeaSwipe(args)
+      } catch {}
       // Move to next idea after a short delay
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1)
@@ -7661,18 +7660,9 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
           liked: action === "like",
           createdAt: Date.now(),
         }
-        const result = await saveIdeaSwipe(args)
-      } catch (err) {}
+        await saveIdeaSwipe(args)
+      } catch {}
       onClose()
-    }
-  }
-
-  // Handle save action
-  const handleSave = () => {
-    if (!saved.includes(currentIdea.id)) {
-      setSaved([...saved, currentIdea.id])
-    } else {
-      setSaved(saved.filter((id) => id !== currentIdea.id))
     }
   }
 
@@ -7816,7 +7806,7 @@ export function IdeaDetailModal({ idea, isOpen, onClose, onLike, onDislike, onSa
               <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
             </div>
           ) : (
-            <div className={`w-full aspect-[9/16] bg-gradient-to-br ${getGradient(idea.id)}`} />
+            <div className={`w-full aspect-[9/16] bg-gradient-to-br ${getGradient(Number(idea.id))}`} />
           )}
 
           <div className="p-6">
@@ -7828,10 +7818,9 @@ export function IdeaDetailModal({ idea, isOpen, onClose, onLike, onDislike, onSa
             </div>
             <p className="text-gray-600">{idea.description}</p>
 
-            {idea.likes && idea.matches && (
+            {typeof idea.likeCount === "number" && (
               <div className="flex gap-4 mt-6 text-sm text-gray-500">
-                <div>{idea.likes} likes</div>
-                <div>{idea.matches} matches</div>
+                <div>{idea.likeCount} likes</div>
               </div>
             )}
           </div>
@@ -7889,7 +7878,7 @@ export function IdeaSwiper({ ideas }: IdeaSwiperProps) {
       setDirection(dir)
 
       if (dir === "right") {
-        setLiked([...liked, currentIdea.id])
+        setLiked([...liked, Number(currentIdea.id)])
       }
 
       // After animation completes, the index will be updated in onExitComplete
@@ -7900,10 +7889,10 @@ export function IdeaSwiper({ ideas }: IdeaSwiperProps) {
   }
 
   const handleSave = () => {
-    if (!saved.includes(currentIdea.id)) {
-      setSaved([...saved, currentIdea.id])
+    if (!saved.includes(Number(currentIdea.id))) {
+      setSaved([...saved, Number(currentIdea.id)])
     } else {
-      setSaved(saved.filter((id) => id !== currentIdea.id))
+      setSaved(saved.filter((id) => id !== Number(currentIdea.id)))
     }
   }
 
@@ -7995,13 +7984,13 @@ export function IdeaSwiper({ ideas }: IdeaSwiperProps) {
                       <Image src={currentIdea.imageUrl || "/placeholder.svg"} alt={currentIdea.title} fill className="object-cover" onClick={() => setShowCarousel(true)} />
                     </div>
                   ) : (
-                    <div className={`h-[400px] w-full bg-gradient-to-br ${getGradient(currentIdea.id)}`} onClick={() => setShowCarousel(true)} />
+                    <div className={`h-[400px] w-full bg-gradient-to-br ${getGradient(Number(currentIdea.id))}`} onClick={() => setShowCarousel(true)} />
                   )}
                   <div className="p-6 flex-1 flex flex-col">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-xl font-bold line-clamp-1">{currentIdea.title}</h3>
-                      <Button variant="ghost" size="icon" className={`rounded-full ${saved.includes(currentIdea.id) ? "text-yellow-500" : ""}`} onClick={handleSave}>
-                        <Star className={saved.includes(currentIdea.id) ? "fill-yellow-500" : ""} size={20} />
+                      <Button variant="ghost" size="icon" className={`rounded-full ${saved.includes(Number(currentIdea.id)) ? "text-yellow-500" : ""}`} onClick={handleSave}>
+                        <Star className={saved.includes(Number(currentIdea.id)) ? "fill-yellow-500" : ""} size={20} />
                       </Button>
                     </div>
                     <p className="text-gray-600 flex-1 text-sm line-clamp-3">{currentIdea.description}</p>
@@ -8547,7 +8536,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { ArrowRight, Heart, TrendingUp, Users } from "lucide-react"
+import { ArrowRight, Heart, TrendingUp } from "lucide-react"
 import { getTrendingIdeas } from "@/lib/data"
 
 export function TrendingIdeasSection() {
@@ -8563,7 +8552,7 @@ export function TrendingIdeasSection() {
               <TrendingUp className="text-primary" />
               Trending Ideas
             </h2>
-            <p className="text-gray-500 mt-2">See what’s hot in the startup community right now</p>
+            <p className="text-gray-500 mt-2">See what&apos;s hot in the startup community right now</p>
           </div>
           <Link href="/trending">
             <Button variant="outline" className="mt-4 md:mt-0">
@@ -8586,18 +8575,15 @@ export function TrendingIdeasSection() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="font-bold">{idea.title}</h3>
-                  {idea.isHot && <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">🔥 Hot</span>}
                 </div>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">{idea.description}</p>
                 <div className="flex justify-between text-sm">
-                  <div className="flex items-center gap-1">
-                    <Heart className="h-4 w-4 text-red-500" />
-                    <span>{idea.likes}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4 text-blue-500" />
-                    <span>{idea.matches} matches</span>
-                  </div>
+                  {typeof idea.likeCount === "number" && (
+                    <div className="flex items-center gap-1">
+                      <Heart className="h-4 w-4 text-red-500" />
+                      <span>{idea.likeCount} likes</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="bg-muted/20 pb-4 flex justify-center w-full">
@@ -10804,7 +10790,15 @@ export function ExploreView() {
   const convexIdeas = useQuery(api.ideas.list) ?? []
 
   // Map Convex ideas to StartupIdea type
-  const ideas: StartupIdea[] = convexIdeas.map((idea: any) => ({
+  interface ConvexIdea {
+    _id: string
+    name: string
+    description: string
+    imageUrl?: string
+    srcUrl?: string
+    createdAt: string | number | Date
+  }
+  const ideas: StartupIdea[] = (convexIdeas as ConvexIdea[]).map((idea) => ({
     id: idea._id,
     title: idea.name,
     description: idea.description,
@@ -10919,15 +10913,11 @@ export function MatchesView() {
                     <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
                   </div>
                 ) : (
-                  <div className={`aspect-[9/16] w-full max-h-[200px] bg-gradient-to-br ${getGradient(idea.id)}`} />
+                  <div className={`aspect-[9/16] w-full max-h-[200px] bg-gradient-to-br ${getGradient(Number(idea.id))}`} />
                 )}
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <CardTitle>{idea.title}</CardTitle>
-                    <div className="flex items-center gap-1 text-sm">
-                      <Users className="h-4 w-4 text-blue-500" />
-                      <span>{idea.matches} matches</span>
-                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -10967,7 +10957,7 @@ export function MatchesView() {
                     <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
                   </div>
                 ) : (
-                  <div className={`aspect-[9/16] w-full max-h-[200px] bg-gradient-to-br ${getGradient(idea.id)}`} />
+                  <div className={`aspect-[9/16] w-full max-h-[200px] bg-gradient-to-br ${getGradient(Number(idea.id))}`} />
                 )}
                 <CardHeader>
                   <div className="flex justify-between items-start">
@@ -10981,10 +10971,6 @@ export function MatchesView() {
                   <p className="text-gray-600 line-clamp-3">{idea.description}</p>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <Button variant="outline" size="sm">
-                    <Users className="mr-2 h-4 w-4" />
-                    {idea.matches} Interested
-                  </Button>
                   <Button variant="outline" size="sm">
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Discuss
@@ -11249,7 +11235,7 @@ export function SubmitView() {
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { ArrowUpRight, Heart, MessageCircle, Star, TrendingUp, Users } from "lucide-react"
+import { Heart, MessageCircle, Star, TrendingUp } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getTrendingIdeas } from "@/lib/data"
@@ -11316,30 +11302,19 @@ export function TrendingView() {
                 <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
               </div>
             ) : (
-              <div className={`aspect-[9/16] w-full max-h-[300px] bg-gradient-to-br ${getGradient(idea.id)}`} />
+              <div className={`aspect-[9/16] w-full max-h-[300px] bg-gradient-to-br ${getGradient(Number(idea.id))}`} />
             )}
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="font-bold text-lg">{idea.title}</h3>
-                {idea.isHot && <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">🔥 Hot</span>}
               </div>
               <p className="text-gray-600 text-sm mb-4 line-clamp-2">{idea.description}</p>
-              <div className="flex justify-between text-sm">
+              {typeof idea.likeCount === "number" && (
                 <div className="flex items-center gap-1">
                   <Heart className="h-4 w-4 text-red-500" />
-                  <span>{idea.likes}</span>
+                  <span>{idea.likeCount} likes</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4 text-blue-500" />
-                  <span>{idea.matches} matches</span>
-                </div>
-                {idea.growth && (
-                  <div className="flex items-center gap-1 text-xs font-medium text-green-600">
-                    <ArrowUpRight className="h-3 w-3" />
-                    {idea.growth}
-                  </div>
-                )}
-              </div>
+              )}
             </CardContent>
             <CardFooter className="flex justify-between p-4 pt-0">
               <Button variant="outline" size="sm">
@@ -12214,7 +12189,7 @@ import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 
 // Define allowed table names for type safety
-const ALLOWED_TABLES = ["visits", "mailing_list_subscriptions"] as const
+const ALLOWED_TABLES = ["visits", "mailing_list_subscriptions", "idea_swipes"] as const
 type TableName = typeof ALLOWED_TABLES[number]
 
 function isTestOrDevEnv() {
@@ -12226,7 +12201,11 @@ function isTestOrDevEnv() {
  * This mutation should only be available in test environments
  */
 export const deleteAll = mutation({
-  args: { tableName: v.union(v.literal("visits"), v.literal("mailing_list_subscriptions")) },
+  args: { tableName: v.union(
+    v.literal("visits"),
+    v.literal("mailing_list_subscriptions"),
+    v.literal("idea_swipes")
+  ) },
   handler: async (ctx, args) => {
     if (!isTestOrDevEnv()) {
       throw new Error("This operation is only allowed in test or development environments");
@@ -12244,7 +12223,11 @@ export const deleteAll = mutation({
  * This query should only be available in test environments
  */
 export const countDocuments = query({
-  args: { tableName: v.union(v.literal("visits"), v.literal("mailing_list_subscriptions")) },
+  args: { tableName: v.union(
+    v.literal("visits"),
+    v.literal("mailing_list_subscriptions"),
+    v.literal("idea_swipes")
+  ) },
   handler: async (ctx, args) => {
     if (!isTestOrDevEnv()) {
       throw new Error("This operation is only allowed in test or development environments");
@@ -14902,6 +14885,28 @@ export default async function globalSetup() {
   await setupTestDatabase()
 } 
 
+--- File: tests/ideas.spec.ts ---
+
+import { test, expect } from '@playwright/test';
+import { setupAuthenticatedUser, setupCleanDatabase } from './utils/test-helpers';
+
+test('should not be public', async ({ page }) => {
+  await page.goto('/explore');
+  await page.pause();
+});
+
+test('should load the admin dashboard', async ({ page }) => {
+  // Reset database before this test
+    await setupCleanDatabase();
+    
+    // Login as test user
+    await setupAuthenticatedUser(page);
+    
+    // Navigate to the page
+    await page.goto('/explore');
+    await page.pause();
+});
+
 --- File: tests/subscribe.spec.ts ---
 
 import { test, expect } from '@playwright/test';
@@ -15063,16 +15068,17 @@ import { api } from "@/convex/_generated/api"
 import dotenv from 'dotenv'
 
 dotenv.config()
+const NODE_ENV = process.env.NODE_ENV || 'test'
 
 // Ensure we're in test environment
-if (process.env.NODE_ENV !== 'test') {
-  throw new Error('Database reset utilities should only be used in test environment')
+if (NODE_ENV !== 'test' && NODE_ENV !== 'development') {
+  throw new Error('Database reset utilities should only be used in test or development environment')
 }
 
 // Initialize Convex client
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
-const TABLES_TO_RESET = ['mailing_list_subscriptions', 'visits'] as const
+const TABLES_TO_RESET = ['mailing_list_subscriptions', 'visits', 'idea_swipes'] as const
 // Restrict to allowed table names for type safety
 type TableName = typeof TABLES_TO_RESET[number]
 
