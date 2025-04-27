@@ -122,17 +122,16 @@ ADMIN_USER_IDS=user_1234567890,user_0987654321
 
 ### Convex for Cloud Database
 
-For the database, create a new project in [Convex Console](https://dashboard.convex.dev) then:
+For the database, create a new project in [Convex](https://dashboard.convex.dev) then:
 
 1. Create a new project
 2. Get your deployment URL from the dashboard
 3. Add the following environment variable to `.env`:
 
-When you are ready to deploy, you will need to add a deploy key and public convex url - `https://<your-project>.convex.cloud` - to your environment variables. See more at [docs.convex.dev](https://docs.convex.dev/production/hosting/)
+When you are ready to deploy, you will need to add a deploy key which you will need to generate from the [Convex Dashboard](https://dashboard.convex.dev) in production mode for your project. See more at [docs.convex.dev](https://docs.convex.dev/production/hosting/)
 
 ```
 CONVEX_DEPLOY_KEY=
-NEXT_PUBLIC_CONVEX_URL=
 ```
 
 *Why use Convex?*
@@ -584,6 +583,31 @@ export async function updateProfile(userId: string, data: UpdateProfileData) {
 
 export async function refreshProfile(path: string) {
   revalidatePath(path)
+} 
+
+--- File: app/_actions/save-idea-swipe.ts ---
+
+"use server"
+
+import { recordIdeaSwipe } from "@/lib/services/visits";
+
+export async function saveIdeaSwipe({
+  userId,
+  ideaId,
+  liked,
+  createdAt,
+}: {
+  userId: string;
+  ideaId: string;
+  liked: boolean;
+  createdAt: number;
+}) {
+  try {
+    const result = await recordIdeaSwipe({ userId, ideaId, liked, createdAt });
+    return { success: true, id: result };
+  } catch (error) {
+    return { success: false, error: (error as Error).message };
+  }
 } 
 
 --- File: app/_actions/track-visit.ts ---
@@ -7551,7 +7575,7 @@ export function ParticipationButton() {
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -7559,6 +7583,10 @@ import { Check, X } from "lucide-react"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import type { StartupIdea } from "@/lib/data"
+import { getGradient } from "@/lib/utils"
+import { saveIdeaSwipe } from "@/app/_actions/save-idea-swipe"
+import { useUser } from "@clerk/nextjs"
+import { getUserSwipedIdeaIds } from "@/lib/services/visits"
 
 interface IdeaCarouselProps {
   ideas: StartupIdea[]
@@ -7566,40 +7594,75 @@ interface IdeaCarouselProps {
   onClose: () => void
 }
 
-function seededRandom(str: string) {
-  // Simple hash for deterministic random
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return Math.abs(hash) / 2147483647
-}
-
 export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [liked, setLiked] = useState<string[]>([])
   const [saved, setSaved] = useState<string[]>([])
   const [exitX, setExitX] = useState<number | null>(null)
+  const [unratedIdeas, setUnratedIdeas] = useState<StartupIdea[]>([])
+  const [loading, setLoading] = useState(true)
+  const { user } = useUser()
 
-  const currentIdea = ideas[currentIndex]
+  useEffect(() => {
+    async function fetchUnrated() {
+      if (!user) {
+        setUnratedIdeas([])
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      try {
+        const swipedIds = await getUserSwipedIdeaIds(user.id)
+        const filtered = ideas.filter((idea) => !swipedIds.includes(idea.id))
+        setUnratedIdeas(filtered)
+        setCurrentIndex(0)
+        setLoading(false)
+      } catch (err) {
+        setUnratedIdeas([])
+        setLoading(false)
+      }
+    }
+    fetchUnrated()
+  }, [user, ideas])
+
+  const currentIdea = unratedIdeas[currentIndex]
 
   // Handle like/dislike actions
-  const handleAction = (action: "like" | "dislike") => {
-    if (currentIndex < ideas.length - 1) {
+  const handleAction = async (action: "like" | "dislike") => {
+    if (!user) return // Optionally, show sign-in prompt
+    if (currentIndex < unratedIdeas.length - 1) {
       if (action === "like") {
         setLiked([...liked, currentIdea.id])
         setExitX(500)
       } else {
         setExitX(-500)
       }
-
+      // Save swipe
+      try {
+        const args = {
+          userId: user.id,
+          ideaId: currentIdea.id,
+          liked: action === "like",
+          createdAt: Date.now(),
+        }
+        const result = await saveIdeaSwipe(args)
+      } catch (err) {}
       // Move to next idea after a short delay
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1)
         setExitX(null)
       }, 300)
     } else {
-      // End of ideas
+      // Last idea: save swipe and close
+      try {
+        const args = {
+          userId: user.id,
+          ideaId: currentIdea.id,
+          liked: action === "like",
+          createdAt: Date.now(),
+        }
+        const result = await saveIdeaSwipe(args)
+      } catch (err) {}
       onClose()
     }
   }
@@ -7622,31 +7685,17 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
     }
   }
 
-  // Generate a random gradient based on the idea's id
-  const getGradient = (id: string) => {
-    const gradients = [
-      "from-pink-500 to-purple-500",
-      "from-blue-500 to-teal-500",
-      "from-green-500 to-emerald-500",
-      "from-yellow-500 to-orange-500",
-      "from-purple-500 to-indigo-500",
-      "from-red-500 to-pink-500",
-      "from-fuchsia-500 to-cyan-500",
-      "from-lime-500 to-green-700",
-      "from-amber-500 to-orange-700",
-      "from-sky-500 to-blue-700",
-    ]
-    const rand = seededRandom(id)
-    return gradients[Math.floor(rand * gradients.length)]
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md p-0 h-[90vh] max-h-[800px] flex flex-col gap-0 overflow-hidden">
+      <DialogContent hideClose={true} className="sm:max-w-md p-0 h-[90vh] max-h-[800px] flex flex-col gap-0 overflow-hidden">
         <VisuallyHidden.Root>
           <DialogTitle>Startup Ideas</DialogTitle>
         </VisuallyHidden.Root>
-        {currentIndex < ideas.length ? (
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center p-6">
+            <div className="sr-only">Loading...</div>
+          </div>
+        ) : currentIndex < unratedIdeas.length ? (
           <div className="flex-1 overflow-hidden relative">
             <AnimatePresence mode="wait">
               <motion.div
@@ -7701,14 +7750,14 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">You&apos;ve seen all ideas!</h3>
               <p className="text-gray-600 mb-4">Check back later for more or submit your own.</p>
-              <Button onClick={() => setCurrentIndex(0)} className="bg-primary hover:bg-primary/90">
-                Start Over
+              <Button size="lg" onClick={onClose} className="bg-primary hover:bg-primary/90">
+                Close
               </Button>
             </div>
           </div>
         )}
 
-        {currentIndex < ideas.length && (
+        {currentIndex < unratedIdeas.length && !loading && (
           <div className="flex justify-center gap-8 py-8 border-t border-white/30 bg-black">
             <Button variant="outline" size="icon" className="rounded-full h-16 w-16 border-2 border-red-500 text-red-500 hover:scale-105" onClick={() => handleAction("dislike")}>
               <X className="scale-150" size={32} />
@@ -9483,51 +9532,37 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-function Dialog({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
-function DialogTrigger({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
-function DialogPortal({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
-function DialogClose({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Close>) {
+function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
-function DialogOverlay({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80",
-        className
-      )}
+      className={cn("data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80", className)}
       {...props}
     />
   )
 }
 
-function DialogContent({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content>) {
+interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive.Content> {
+  hideClose?: boolean
+}
+
+function DialogContent({ className, children, hideClose = false, ...props }: DialogContentProps) {
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -9540,76 +9575,34 @@ function DialogContent({
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-          <XIcon />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
+        {!hideClose && (
+          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-4">
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
       </DialogPrimitive.Content>
     </DialogPortal>
   )
 }
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
-      {...props}
-    />
-  )
+  return <div data-slot="dialog-header" className={cn("flex flex-col gap-2 text-center sm:text-left", className)} {...props} />
 }
 
 function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
-      {...props}
-    />
-  )
+  return <div data-slot="dialog-footer" className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)} {...props} />
 }
 
-function DialogTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return (
-    <DialogPrimitive.Title
-      data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
-      {...props}
-    />
-  )
+function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
+  return <DialogPrimitive.Title data-slot="dialog-title" className={cn("text-lg leading-none font-semibold", className)} {...props} />
 }
 
-function DialogDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Description>) {
-  return (
-    <DialogPrimitive.Description
-      data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
-  )
+function DialogDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) {
+  return <DialogPrimitive.Description data-slot="dialog-description" className={cn("text-muted-foreground text-sm", className)} {...props} />
 }
 
-export {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
-}
+export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger }
 
 
 --- File: components/ui/dropdown-menu.tsx ---
@@ -10832,10 +10825,7 @@ export function ExploreView() {
     return (
       <div className="container px-4 py-12 md:px-6 md:py-24">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl mb-4">
-            Loading <span className="text-primary">Ideas</span>
-          </h1>
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </div>
@@ -11897,6 +11887,42 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("ideas").order("desc").collect();
+  },
+});
+
+export const recordSwipe = mutation({
+  args: {
+    ideaId: v.string(),
+    userId: v.string(),
+    liked: v.boolean(),
+    createdAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    // Upsert: if a swipe exists for this user/idea, update it; otherwise, insert
+    const existing = await ctx.db
+      .query("idea_swipes")
+      .withIndex("by_idea_user", q => q.eq("ideaId", args.ideaId).eq("userId", args.userId))
+      .first();
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        liked: args.liked,
+        createdAt: args.createdAt,
+      });
+      return existing._id;
+    } else {
+      return await ctx.db.insert("idea_swipes", args);
+    }
+  },
+});
+
+export const getUserSwipedIdeaIds = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const swipes = await ctx.db
+      .query("idea_swipes")
+      .withIndex("by_user", q => q.eq("userId", args.userId))
+      .collect();
+    return swipes.map(s => s.ideaId);
   },
 }); 
 
@@ -13197,6 +13223,19 @@ export async function getVisitsByPath(path: string, limit?: number) {
  */
 export async function getAllVisits(limit?: number) {
   return await convex.query(api.visits.getVisits, { limit });
+}
+
+export async function recordIdeaSwipe(data: {
+  ideaId: string;
+  userId: string;
+  liked: boolean;
+  createdAt: number;
+}) {
+  return await convex.mutation(api.ideas.recordSwipe, data);
+}
+
+export async function getUserSwipedIdeaIds(userId: string) {
+  return await convex.query(api.ideas.getUserSwipedIdeaIds, { userId });
 } 
 
 --- File: lib/stripe.ts ---
@@ -13503,6 +13542,33 @@ export const getInitials = (name: string) => {
     .substring(0, 2)
 }
 
+// Deterministic seeded random for a string
+export function seededRandom(str: string) {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return Math.abs(hash) / 2147483647
+}
+
+// Generate a random gradient based on a string id
+export function getGradient(id: string) {
+  const gradients = [
+    "from-pink-500 to-purple-500",
+    "from-blue-500 to-teal-500",
+    "from-green-500 to-emerald-500",
+    "from-yellow-500 to-orange-500",
+    "from-purple-500 to-indigo-500",
+    "from-red-500 to-pink-500",
+    "from-fuchsia-500 to-cyan-500",
+    "from-lime-500 to-green-700",
+    "from-amber-500 to-orange-700",
+    "from-sky-500 to-blue-700",
+  ]
+  const rand = seededRandom(id)
+  return gradients[Math.floor(rand * gradients.length)]
+}
+
 
 --- File: middleware.ts ---
 
@@ -13583,7 +13649,7 @@ export default nextConfig;
     "boot:repo": "chmod +x ./scripts/init-repo.sh && ./scripts/init-repo.sh",
     "boot:convex": "sh ./scripts/boot-convex.sh",
     "boot": "pnpm boot:github && pnpm boot:vercel && pnpm boot:convex && pnpm boot:repo",
-    "go": "pnpm generate:routes && pnpm generate:llm && git add . && aicommits && git push origin main",
+    "go": "pnpm generate:routes && git add . && aicommits && pnpm generate:llm && git add . && git commit -m 'update llm.txt' && git push origin main",
     "test:run": "playwright test",
     "test:wait": "wait-on tcp:3000 tcp:4000 && pnpm test:run",
     "test": "pnpm build && concurrently \"pnpm dev\" \"pnpm test:wait\" --success first --kill-others --names \"dev,test\" --prefix-colors \"yellow.bold,cyan.bold\"",
