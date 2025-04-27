@@ -47,17 +47,16 @@ ADMIN_USER_IDS=user_1234567890,user_0987654321
 
 ### Convex for Cloud Database
 
-For the database, create a new project in [Convex Console](https://dashboard.convex.dev) then:
+For the database, create a new project in [Convex](https://dashboard.convex.dev) then:
 
 1. Create a new project
 2. Get your deployment URL from the dashboard
 3. Add the following environment variable to `.env`:
 
-When you are ready to deploy, you will need to add a deploy key and public convex url - `https://<your-project>.convex.cloud` - to your environment variables. See more at [docs.convex.dev](https://docs.convex.dev/production/hosting/)
+When you are ready to deploy, you will need to add a deploy key which you will need to generate from the [Convex Dashboard](https://dashboard.convex.dev) in production mode for your project. See more at [docs.convex.dev](https://docs.convex.dev/production/hosting/)
 
 ```
 CONVEX_DEPLOY_KEY=
-NEXT_PUBLIC_CONVEX_URL=
 ```
 
 *Why use Convex?*
