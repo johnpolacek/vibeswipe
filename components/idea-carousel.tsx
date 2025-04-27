@@ -91,7 +91,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md p-0 h-[90vh] max-h-[800px] flex flex-col gap-0 overflow-hidden">
+      <DialogContent hideClose={true} className="sm:max-w-md p-0 h-[90vh] max-h-[800px] flex flex-col gap-0 overflow-hidden">
         <VisuallyHidden.Root>
           <DialogTitle>Startup Ideas</DialogTitle>
         </VisuallyHidden.Root>
