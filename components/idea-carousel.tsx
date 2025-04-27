@@ -10,24 +10,33 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import type { StartupIdea } from "@/lib/data"
 import { getGradient } from "@/lib/utils"
 import { saveIdeaSwipe } from "@/app/_actions/save-idea-swipe"
-import { useUser } from "@clerk/nextjs"
+import { useUser, SignInButton } from "@clerk/nextjs"
 import { getUserSwipedIdeaIds } from "@/lib/services/visits"
 
 interface IdeaCarouselProps {
   ideas: StartupIdea[]
   isOpen: boolean
   onClose: () => void
+  isGuest?: boolean
 }
 
-export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
+export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [liked, setLiked] = useState<string[]>([])
   const [exitX, setExitX] = useState<number | null>(null)
   const [unratedIdeas, setUnratedIdeas] = useState<StartupIdea[]>([])
   const [loading, setLoading] = useState(true)
+  const [previewFinished, setPreviewFinished] = useState(false)
   const { user } = useUser()
 
   useEffect(() => {
+    if (isGuest) {
+      setUnratedIdeas(ideas)
+      setCurrentIndex(0)
+      setLoading(false)
+      setPreviewFinished(false)
+      return
+    }
     async function fetchUnrated() {
       if (!user) {
         setUnratedIdeas([])
@@ -47,12 +56,30 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
       }
     }
     fetchUnrated()
-  }, [user, ideas])
+  }, [user, ideas, isGuest])
 
   const currentIdea = unratedIdeas[currentIndex]
 
   // Handle like/dislike actions
   const handleAction = async (action: "like" | "dislike") => {
+    if (isGuest) {
+      // Just move to next idea, do not save
+      if (currentIndex < unratedIdeas.length - 1) {
+        if (action === "like") {
+          setLiked([...liked, currentIdea.id])
+          setExitX(500)
+        } else {
+          setExitX(-500)
+        }
+        setTimeout(() => {
+          setCurrentIndex(currentIndex + 1)
+          setExitX(null)
+        }, 300)
+      } else {
+        setPreviewFinished(true)
+      }
+      return
+    }
     if (!user) return // Optionally, show sign-in prompt
     if (currentIndex < unratedIdeas.length - 1) {
       if (action === "like") {
@@ -110,6 +137,18 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="sr-only">Loading...</div>
           </div>
+        ) : previewFinished && isGuest ? (
+          <div className="flex-1 flex items-center justify-center p-6">
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2">We hope you enjoyed the preview!</h3>
+              <p className="text-gray-600 mb-4 text-balance">Sign up for an account to access all ideas, save your matches, discover trending ideas, and submit your own.</p>
+              <SignInButton mode="modal">
+                <Button size="lg" className="bg-primary hover:bg-primary/90">
+                  Sign up to Continue
+                </Button>
+              </SignInButton>
+            </div>
+          </div>
         ) : currentIndex < unratedIdeas.length ? (
           <div className="flex-1 overflow-hidden relative">
             <AnimatePresence mode="wait">
@@ -160,7 +199,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
               </motion.div>
             </AnimatePresence>
           </div>
-        ) : (
+        ) : isGuest ? null : (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">You&apos;ve seen all ideas!</h3>
@@ -172,7 +211,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
           </div>
         )}
 
-        {currentIndex < unratedIdeas.length && !loading && (
+        {currentIndex < unratedIdeas.length && !loading && !previewFinished && (
           <div className="flex justify-center gap-8 py-8 border-t border-white/30 bg-black">
             <Button variant="outline" size="icon" className="rounded-full h-16 w-16 border-2 border-red-500 text-red-500 hover:scale-105" onClick={() => handleAction("dislike")}>
               <X className="scale-150" size={32} />
