@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { ArrowUpRight, Heart, MessageCircle, Star, TrendingUp, Users } from "lucide-react"
+import { Heart, MessageCircle, Star, TrendingUp } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getTrendingIdeas } from "@/lib/data"
@@ -68,30 +68,19 @@ export function TrendingView() {
                 <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
               </div>
             ) : (
-              <div className={`aspect-[9/16] w-full max-h-[300px] bg-gradient-to-br ${getGradient(idea.id)}`} />
+              <div className={`aspect-[9/16] w-full max-h-[300px] bg-gradient-to-br ${getGradient(Number(idea.id))}`} />
             )}
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="font-bold text-lg">{idea.title}</h3>
-                {idea.isHot && <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">🔥 Hot</span>}
               </div>
               <p className="text-gray-600 text-sm mb-4 line-clamp-2">{idea.description}</p>
-              <div className="flex justify-between text-sm">
+              {typeof idea.likeCount === "number" && (
                 <div className="flex items-center gap-1">
                   <Heart className="h-4 w-4 text-red-500" />
-                  <span>{idea.likes}</span>
+                  <span>{idea.likeCount} likes</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4 text-blue-500" />
-                  <span>{idea.matches} matches</span>
-                </div>
-                {idea.growth && (
-                  <div className="flex items-center gap-1 text-xs font-medium text-green-600">
-                    <ArrowUpRight className="h-3 w-3" />
-                    {idea.growth}
-                  </div>
-                )}
-              </div>
+              )}
             </CardContent>
             <CardFooter className="flex justify-between p-4 pt-0">
               <Button variant="outline" size="sm">

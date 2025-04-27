@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { ArrowRight, Heart, TrendingUp, Users } from "lucide-react"
+import { ArrowRight, Heart, TrendingUp } from "lucide-react"
 import { getTrendingIdeas } from "@/lib/data"
 
 export function TrendingIdeasSection() {
@@ -18,7 +18,7 @@ export function TrendingIdeasSection() {
               <TrendingUp className="text-primary" />
               Trending Ideas
             </h2>
-            <p className="text-gray-500 mt-2">See what’s hot in the startup community right now</p>
+            <p className="text-gray-500 mt-2">See what&apos;s hot in the startup community right now</p>
           </div>
           <Link href="/trending">
             <Button variant="outline" className="mt-4 md:mt-0">
@@ -41,18 +41,15 @@ export function TrendingIdeasSection() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="font-bold">{idea.title}</h3>
-                  {idea.isHot && <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">🔥 Hot</span>}
                 </div>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">{idea.description}</p>
                 <div className="flex justify-between text-sm">
-                  <div className="flex items-center gap-1">
-                    <Heart className="h-4 w-4 text-red-500" />
-                    <span>{idea.likes}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4 text-blue-500" />
-                    <span>{idea.matches} matches</span>
-                  </div>
+                  {typeof idea.likeCount === "number" && (
+                    <div className="flex items-center gap-1">
+                      <Heart className="h-4 w-4 text-red-500" />
+                      <span>{idea.likeCount} likes</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="bg-muted/20 pb-4 flex justify-center w-full">

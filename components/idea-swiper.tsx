@@ -34,7 +34,7 @@ export function IdeaSwiper({ ideas }: IdeaSwiperProps) {
       setDirection(dir)
 
       if (dir === "right") {
-        setLiked([...liked, currentIdea.id])
+        setLiked([...liked, Number(currentIdea.id)])
       }
 
       // After animation completes, the index will be updated in onExitComplete
@@ -45,10 +45,10 @@ export function IdeaSwiper({ ideas }: IdeaSwiperProps) {
   }
 
   const handleSave = () => {
-    if (!saved.includes(currentIdea.id)) {
-      setSaved([...saved, currentIdea.id])
+    if (!saved.includes(Number(currentIdea.id))) {
+      setSaved([...saved, Number(currentIdea.id)])
     } else {
-      setSaved(saved.filter((id) => id !== currentIdea.id))
+      setSaved(saved.filter((id) => id !== Number(currentIdea.id)))
     }
   }
 
@@ -140,13 +140,13 @@ export function IdeaSwiper({ ideas }: IdeaSwiperProps) {
                       <Image src={currentIdea.imageUrl || "/placeholder.svg"} alt={currentIdea.title} fill className="object-cover" onClick={() => setShowCarousel(true)} />
                     </div>
                   ) : (
-                    <div className={`h-[400px] w-full bg-gradient-to-br ${getGradient(currentIdea.id)}`} onClick={() => setShowCarousel(true)} />
+                    <div className={`h-[400px] w-full bg-gradient-to-br ${getGradient(Number(currentIdea.id))}`} onClick={() => setShowCarousel(true)} />
                   )}
                   <div className="p-6 flex-1 flex flex-col">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-xl font-bold line-clamp-1">{currentIdea.title}</h3>
-                      <Button variant="ghost" size="icon" className={`rounded-full ${saved.includes(currentIdea.id) ? "text-yellow-500" : ""}`} onClick={handleSave}>
-                        <Star className={saved.includes(currentIdea.id) ? "fill-yellow-500" : ""} size={20} />
+                      <Button variant="ghost" size="icon" className={`rounded-full ${saved.includes(Number(currentIdea.id)) ? "text-yellow-500" : ""}`} onClick={handleSave}>
+                        <Star className={saved.includes(Number(currentIdea.id)) ? "fill-yellow-500" : ""} size={20} />
                       </Button>
                     </div>
                     <p className="text-gray-600 flex-1 text-sm line-clamp-3">{currentIdea.description}</p>

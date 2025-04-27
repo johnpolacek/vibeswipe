@@ -22,7 +22,6 @@ interface IdeaCarouselProps {
 export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [liked, setLiked] = useState<string[]>([])
-  const [saved, setSaved] = useState<string[]>([])
   const [exitX, setExitX] = useState<number | null>(null)
   const [unratedIdeas, setUnratedIdeas] = useState<StartupIdea[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,7 +41,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
         setUnratedIdeas(filtered)
         setCurrentIndex(0)
         setLoading(false)
-      } catch (err) {
+      } catch {
         setUnratedIdeas([])
         setLoading(false)
       }
@@ -70,8 +69,8 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
           liked: action === "like",
           createdAt: Date.now(),
         }
-        const result = await saveIdeaSwipe(args)
-      } catch (err) {}
+        await saveIdeaSwipe(args)
+      } catch {}
       // Move to next idea after a short delay
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1)
@@ -86,18 +85,9 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
           liked: action === "like",
           createdAt: Date.now(),
         }
-        const result = await saveIdeaSwipe(args)
-      } catch (err) {}
+        await saveIdeaSwipe(args)
+      } catch {}
       onClose()
-    }
-  }
-
-  // Handle save action
-  const handleSave = () => {
-    if (!saved.includes(currentIdea.id)) {
-      setSaved([...saved, currentIdea.id])
-    } else {
-      setSaved(saved.filter((id) => id !== currentIdea.id))
     }
   }
 

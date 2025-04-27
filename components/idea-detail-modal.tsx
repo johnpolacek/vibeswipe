@@ -39,7 +39,7 @@ export function IdeaDetailModal({ idea, isOpen, onClose, onLike, onDislike, onSa
               <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
             </div>
           ) : (
-            <div className={`w-full aspect-[9/16] bg-gradient-to-br ${getGradient(idea.id)}`} />
+            <div className={`w-full aspect-[9/16] bg-gradient-to-br ${getGradient(Number(idea.id))}`} />
           )}
 
           <div className="p-6">
@@ -51,10 +51,9 @@ export function IdeaDetailModal({ idea, isOpen, onClose, onLike, onDislike, onSa
             </div>
             <p className="text-gray-600">{idea.description}</p>
 
-            {idea.likes && idea.matches && (
+            {typeof idea.likeCount === "number" && (
               <div className="flex gap-4 mt-6 text-sm text-gray-500">
-                <div>{idea.likes} likes</div>
-                <div>{idea.matches} matches</div>
+                <div>{idea.likeCount} likes</div>
               </div>
             )}
           </div>

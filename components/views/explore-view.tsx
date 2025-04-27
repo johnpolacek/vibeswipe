@@ -15,7 +15,15 @@ export function ExploreView() {
   const convexIdeas = useQuery(api.ideas.list) ?? []
 
   // Map Convex ideas to StartupIdea type
-  const ideas: StartupIdea[] = convexIdeas.map((idea: any) => ({
+  interface ConvexIdea {
+    _id: string
+    name: string
+    description: string
+    imageUrl?: string
+    srcUrl?: string
+    createdAt: string | number | Date
+  }
+  const ideas: StartupIdea[] = (convexIdeas as ConvexIdea[]).map((idea) => ({
     id: idea._id,
     title: idea.name,
     description: idea.description,

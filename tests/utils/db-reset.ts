@@ -13,7 +13,7 @@ if (NODE_ENV !== 'test' && NODE_ENV !== 'development') {
 // Initialize Convex client
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
-const TABLES_TO_RESET = ['mailing_list_subscriptions', 'visits'] as const
+const TABLES_TO_RESET = ['mailing_list_subscriptions', 'visits', 'idea_swipes'] as const
 // Restrict to allowed table names for type safety
 type TableName = typeof TABLES_TO_RESET[number]
 
