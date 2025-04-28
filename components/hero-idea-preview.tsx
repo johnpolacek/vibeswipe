@@ -16,9 +16,6 @@ export function HeroIdeaPreview() {
     return () => clearInterval(interval)
   }, [])
 
-  // Calculate the next card index
-  const nextIndex = (currentIndex + 1) % mockIdeas.length
-
   // Determine rotation direction based on card index (alternating)
   const getRotation = (index: number): string => {
     return index % 2 === 0 ? "3deg" : "-3deg"
