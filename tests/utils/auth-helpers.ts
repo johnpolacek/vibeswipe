@@ -17,25 +17,47 @@ export const TEST_USER = {
  * @param page - Playwright page object
  */
 export async function loginTestUser(page: Page): Promise<void> {
+  await page.pause();
+  console.log('[loginTestUser] Called');
+  // Mask password in logs
+  const { email, password, fullName, username, userId } = TEST_USER;
+  console.log('[loginTestUser] TEST_USER:', { email, password: password ? '***' : undefined, fullName, username, userId });
+
   // Navigate to an unprotected page that loads Clerk
   await page.goto('/');
 
   // Setup Clerk for testing
+  console.log('[loginTestUser] Running clerkSetup...');
   await clerkSetup();
+  console.log('[loginTestUser] clerkSetup complete');
 
   // Use Clerk's testing utilities to sign in
-  await clerk.signIn({
-    page,
-    signInParams: {
-      strategy: 'password',
-      identifier: TEST_USER.email,
-      password: TEST_USER.password
-    }
-  });
+  console.log('[loginTestUser] Calling clerk.signIn...');
+  try {
+    await clerk.signIn({
+      page,
+      signInParams: {
+        strategy: 'password',
+        identifier: TEST_USER.email,
+        password: TEST_USER.password
+      }
+    });
+    console.log('[loginTestUser] clerk.signIn succeeded');
+  } catch (err) {
+    console.error('[loginTestUser] clerk.signIn failed:', err);
+    throw err;
+  }
 
   // Navigate to the home page and verify we're logged in
+  console.log('[loginTestUser] Navigating to home page...');
   await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Open user button' })).toBeVisible({timeout: 30000});
+  try {
+    await expect(page.getByRole('button', { name: 'Open user button' })).toBeVisible({timeout: 30000});
+    console.log('[loginTestUser] User button is visible, login successful');
+  } catch (err) {
+    console.error('[loginTestUser] User button not visible after login:', err);
+    throw err;
+  }
 }
 
 /**

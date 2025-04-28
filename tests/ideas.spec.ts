@@ -3,7 +3,6 @@ import { setupAuthenticatedUser, setupCleanDatabase } from './utils/test-helpers
 
 test('should display preview for guests', async ({ page }) => {
   await page.goto('/');
-
   await page.getByRole('button', { name: 'Start Swiping' }).click();
   await expect(page.getByRole('heading', { name: 'Sign up to explore all ideas' })).toBeVisible();
   await page.getByRole('button', { name: 'Sign up / Sign in' }).click();
@@ -26,7 +25,7 @@ test('should display preview for guests', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Sign in to vibecode.party' })).toBeVisible();
 });
 
-test('should load the admin dashboard', async ({ page }) => {
+test('should swipe through ideas for authenticated user', async ({ page }) => {
   // Reset database before this test
     await setupCleanDatabase();
     
@@ -34,5 +33,8 @@ test('should load the admin dashboard', async ({ page }) => {
     await setupAuthenticatedUser(page);
     
     // Navigate to the page
-    await page.pause();
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Start Swiping' }).click();
+    await expect(page.getByRole('heading', { name: 'PetMatch' })).toBeVisible();
+    await page.getByRole('button').nth(1).click();
 });

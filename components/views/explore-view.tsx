@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { IdeaCarousel } from "@/components/idea-carousel"
 import { useUser, SignInButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,13 @@ export function ExploreView() {
   // Only auto-show carousel if signed in
   const [showCarousel, setShowCarousel] = useState(isSignedIn)
   const convexIdeas = useQuery(api.ideas.list) ?? []
+
+  // Auto-open carousel for signed-in users
+  useEffect(() => {
+    if (isLoaded && isSignedIn && !showCarousel) {
+      setShowCarousel(true)
+    }
+  }, [isLoaded, isSignedIn])
 
   // Map Convex ideas to StartupIdea type
   interface ConvexIdea {
@@ -67,6 +74,12 @@ export function ExploreView() {
             Explore <span className="text-primary">Ideas</span>
           </h1>
           <p className="max-w-[600px] mx-auto text-gray-500 text-balance md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Swipe through project ideas and find your vibe.</p>
+          {/* Start Swiping button for signed-in users when carousel is not open */}
+          {isSignedIn && !showCarousel && (
+            <Button size="lg" className="mt-6" onClick={() => setShowCarousel(true)}>
+              Start Swiping
+            </Button>
+          )}
         </div>
       )}
 
