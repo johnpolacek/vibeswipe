@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { HeroIdeaPreview } from "@/components/hero-idea-preview"
@@ -6,7 +8,7 @@ export function HeroSection() {
   return (
     <section className="relative w-full py-12 md:py-16 bg-gradient-to-b from-background via-primary/5 to-primary/20 overflow-hidden">
       {/* Ultra-dense ocean wavy lines SVG background */}
-      <div className="absolute -top-4 left-0 w-full h-full pointer-events-none z-0 opacity-40">
+      <div className="absolute -top-4 left-0 w-full h-full pointer-events-none z-0 opacity-40 animate-wave-slow">
         <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
           <g stroke="#38bdf8" strokeWidth="0.7" opacity="0.18">
             {Array.from({ length: 60 }).map((_, i) => (
@@ -42,6 +44,22 @@ export function HeroSection() {
           </div>
         </div>
       </div>
+
+      {/* Add animation keyframes via style tag */}
+      <style jsx>{`
+        @keyframes waveAnimation {
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(-15px);
+          }
+        }
+
+        .animate-wave-slow {
+          animation: waveAnimation 3s infinite alternate ease-in-out;
+        }
+      `}</style>
     </section>
   )
 }
