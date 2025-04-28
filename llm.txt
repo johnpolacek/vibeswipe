@@ -5975,16 +5975,73 @@ export function LogoLockup() {
 }
 
 
+--- File: components/hero-idea-preview.tsx ---
+
+"use client"
+
+import { useEffect, useState } from "react"
+import { Card } from "@/components/ui/card"
+import { mockIdeas } from "@/lib/data/mock-ideas"
+
+export function HeroIdeaPreview() {
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  // Slower animation - 5 seconds per card
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((current) => (current + 1) % mockIdeas.length)
+    }, 5000) // 5 seconds per card
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Determine rotation direction based on card index (alternating)
+  const getRotation = (index: number): string => {
+    return index % 2 === 0 ? "3deg" : "-3deg"
+  }
+
+  return (
+    <div id="idea-carousel-preview" className="relative w-[300px] h-[450px] md:w-[350px] md:h-[525px] rounded-xl shadow-xl overflow-hidden bg-black ring-8 ring-primary/20">
+      {/* All card images pre-rendered with CSS transitions */}
+      {mockIdeas.map((idea, index) => (
+        <Card
+          key={idea.id}
+          className="absolute inset-0 w-full h-full border-2 border-white/20 overflow-hidden flex flex-col items-center justify-end transition-all ease-in-out duration-500"
+          style={{
+            opacity: index === currentIndex ? 1 : 0,
+            transform: index === currentIndex ? "rotate(0deg)" : `rotate(${getRotation(index)})`,
+            zIndex: index === currentIndex ? 1 : 0,
+            pointerEvents: "none",
+            scale: index === currentIndex ? 1 : 1.1,
+          }}
+        >
+          <img src={idea.imageUrl} alt={idea.title} className="object-cover w-full h-full absolute inset-0" />
+          <div className="absolute bottom-0 left-0 z-10 w-full h-full bg-gradient-to-t from-black via-transparent to-transparent" />
+          <div className="absolute bottom-0 left-0 z-10 w-full h-full bg-gradient-to-b from-background/30 via-transparent to-transparent" />
+          <div className="absolute bottom-0 left-0 w-full pt-6 pb-8 z-10 px-2 flex flex-col items-center">
+            <h4 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-balance text-white text-center drop-shadow-lg pb-2">{idea.title}</h4>
+            <p className="text-sm md:text-base text-balance text-white/80 text-center drop-shadow-lg">{idea.description}</p>
+          </div>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+
 --- File: components/hero-section.tsx ---
+
+"use client"
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { HeroIdeaPreview } from "@/components/hero-idea-preview"
 
 export function HeroSection() {
   return (
     <section className="relative w-full py-12 md:py-16 bg-gradient-to-b from-background via-primary/5 to-primary/20 overflow-hidden">
       {/* Ultra-dense ocean wavy lines SVG background */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40">
+      <div className="absolute -top-4 left-0 w-full h-full pointer-events-none z-0 opacity-40 animate-wave-slow">
         <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
           <g stroke="#38bdf8" strokeWidth="0.7" opacity="0.18">
             {Array.from({ length: 60 }).map((_, i) => (
@@ -5998,12 +6055,12 @@ export function HeroSection() {
       </div>
       {/* End ultra-dense ocean wavy lines SVG background */}
       <div className="container px-4 md:px-6 relative z-10">
-        <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center max-w-5xl mx-auto">
+        <div className="grid gap-6 lg:grid-cols-2 items-center max-w-6xl mx-auto">
           <div className="space-y-4">
-            <h1 className="text-3xl font-bold sm:text-4xl md:text-5xl">
+            <h1 className="text-3xl font-medium tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
               Find Your Next <span className="text-primary font-extrabold tracking-wide">Vibe</span>
             </h1>
-            <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Swipe through project ideas, vibe the ones you love.</p>
+            <p className="max-w-[600px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Swipe through project ideas, vibe the ones you love.</p>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
               <Link href="/explore">
                 <Button size="lg">Start Swiping</Button>
@@ -6016,40 +6073,26 @@ export function HeroSection() {
             </div>
           </div>
           <div className="flex justify-center">
-            <div className="relative w-[300px] h-[450px] md:w-[350px] md:h-[525px] rounded-xl shadow-xl overflow-hidden border">
-              <div className="absolute inset-0 bg-gradient-to-b from-primary/90 to-primary/80 flex items-center justify-center">
-                <div className="text-center text-white p-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary flex items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-white"
-                    >
-                      <path d="M12 2v4" />
-                      <path d="M12 18v4" />
-                      <path d="M4.93 4.93l2.83 2.83" />
-                      <path d="M16.24 16.24l2.83 2.83" />
-                      <path d="M2 12h4" />
-                      <path d="M18 12h4" />
-                      <path d="M4.93 19.07l2.83-2.83" />
-                      <path d="M16.24 7.76l2.83-2.83" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">AI-Powered Matchmaking</h3>
-                  <p className="mt-2 text-white">Our algorithm learns your preferences to show you ideas you&apos;ll love</p>
-                </div>
-              </div>
-            </div>
+            <HeroIdeaPreview />
           </div>
         </div>
       </div>
+
+      {/* Add animation keyframes via style tag */}
+      <style jsx>{`
+        @keyframes waveAnimation {
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(-15px);
+          }
+        }
+
+        .animate-wave-slow {
+          animation: waveAnimation 3s infinite alternate ease-in-out;
+        }
+      `}</style>
     </section>
   )
 }
@@ -7585,24 +7628,33 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import type { StartupIdea } from "@/lib/data"
 import { getGradient } from "@/lib/utils"
 import { saveIdeaSwipe } from "@/app/_actions/save-idea-swipe"
-import { useUser } from "@clerk/nextjs"
+import { useUser, SignInButton } from "@clerk/nextjs"
 import { getUserSwipedIdeaIds } from "@/lib/services/visits"
 
 interface IdeaCarouselProps {
   ideas: StartupIdea[]
   isOpen: boolean
   onClose: () => void
+  isGuest?: boolean
 }
 
-export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
+export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [liked, setLiked] = useState<string[]>([])
   const [exitX, setExitX] = useState<number | null>(null)
   const [unratedIdeas, setUnratedIdeas] = useState<StartupIdea[]>([])
   const [loading, setLoading] = useState(true)
+  const [previewFinished, setPreviewFinished] = useState(false)
   const { user } = useUser()
 
   useEffect(() => {
+    if (isGuest) {
+      setUnratedIdeas(ideas)
+      setCurrentIndex(0)
+      setLoading(false)
+      setPreviewFinished(false)
+      return
+    }
     async function fetchUnrated() {
       if (!user) {
         setUnratedIdeas([])
@@ -7622,12 +7674,30 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
       }
     }
     fetchUnrated()
-  }, [user, ideas])
+  }, [user, ideas, isGuest])
 
   const currentIdea = unratedIdeas[currentIndex]
 
   // Handle like/dislike actions
   const handleAction = async (action: "like" | "dislike") => {
+    if (isGuest) {
+      // Just move to next idea, do not save
+      if (currentIndex < unratedIdeas.length - 1) {
+        if (action === "like") {
+          setLiked([...liked, currentIdea.id])
+          setExitX(500)
+        } else {
+          setExitX(-500)
+        }
+        setTimeout(() => {
+          setCurrentIndex(currentIndex + 1)
+          setExitX(null)
+        }, 300)
+      } else {
+        setPreviewFinished(true)
+      }
+      return
+    }
     if (!user) return // Optionally, show sign-in prompt
     if (currentIndex < unratedIdeas.length - 1) {
       if (action === "like") {
@@ -7685,6 +7755,18 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="sr-only">Loading...</div>
           </div>
+        ) : previewFinished && isGuest ? (
+          <div className="flex-1 flex items-center justify-center p-6">
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2">We hope you enjoyed the preview!</h3>
+              <p className="text-gray-600 mb-4 text-balance">Sign up for an account to access all ideas, save your matches, discover trending ideas, and submit your own.</p>
+              <SignInButton mode="modal">
+                <Button size="lg" className="bg-primary hover:bg-primary/90">
+                  Sign up to Continue
+                </Button>
+              </SignInButton>
+            </div>
+          </div>
         ) : currentIndex < unratedIdeas.length ? (
           <div className="flex-1 overflow-hidden relative">
             <AnimatePresence mode="wait">
@@ -7735,7 +7817,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
               </motion.div>
             </AnimatePresence>
           </div>
-        ) : (
+        ) : isGuest ? null : (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">You&apos;ve seen all ideas!</h3>
@@ -7747,7 +7829,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose }: IdeaCarouselProps) {
           </div>
         )}
 
-        {currentIndex < unratedIdeas.length && !loading && (
+        {currentIndex < unratedIdeas.length && !loading && !previewFinished && (
           <div className="flex justify-center gap-8 py-8 border-t border-white/30 bg-black">
             <Button variant="outline" size="icon" className="rounded-full h-16 w-16 border-2 border-red-500 text-red-500 hover:scale-105" onClick={() => handleAction("dislike")}>
               <X className="scale-150" size={32} />
@@ -10775,19 +10857,29 @@ export { Textarea }
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { IdeaCarousel } from "@/components/idea-carousel"
-import { useUser } from "@clerk/nextjs"
+import { useUser, SignInButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import type { StartupIdea } from "@/lib/data"
+import { mockIdeas } from "@/lib/data/mock-ideas"
+import { Card, CardContent } from "@/components/ui/card"
 
 export function ExploreView() {
-  const { isLoaded } = useUser()
-  const [showCarousel, setShowCarousel] = useState(true)
+  const { isLoaded, isSignedIn } = useUser()
+  // Only auto-show carousel if signed in
+  const [showCarousel, setShowCarousel] = useState(isSignedIn)
   const convexIdeas = useQuery(api.ideas.list) ?? []
+
+  // Auto-open carousel for signed-in users
+  useEffect(() => {
+    if (isLoaded && isSignedIn && !showCarousel) {
+      setShowCarousel(true)
+    }
+  }, [isLoaded, isSignedIn])
 
   // Map Convex ideas to StartupIdea type
   interface ConvexIdea {
@@ -10815,7 +10907,11 @@ export function ExploreView() {
     )
   }
 
-  if (!ideas.length) {
+  // For guests, always show mock ideas
+  const showIdeas = isSignedIn ? ideas : mockIdeas
+  const isGuest = !isSignedIn
+
+  if (!showIdeas.length) {
     return (
       <div className="container px-4 py-12 md:px-6 md:py-24">
         <div className="text-center mb-12">
@@ -10829,24 +10925,52 @@ export function ExploreView() {
 
   return (
     <div className="container px-4 py-12 md:px-6 md:py-24">
-      <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl mb-4">
-          Explore <span className="text-primary">Ideas</span>
-        </h1>
-        <p className="max-w-[600px] mx-auto text-gray-500 text-balance md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Swipe through project ideas and find your vibe.</p>
-      </div>
-
-      <div className="mx-auto max-w-3xl">
-        {!showCarousel && (
-          <div className="text-center">
-            <Button size="lg" onClick={() => setShowCarousel(true)} className="px-6 py-3">
+      {!isGuest && (
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl mb-4">
+            Explore <span className="text-primary">Ideas</span>
+          </h1>
+          <p className="max-w-[600px] mx-auto text-gray-500 text-balance md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Swipe through project ideas and find your vibe.</p>
+          {/* Start Swiping button for signed-in users when carousel is not open */}
+          {isSignedIn && !showCarousel && (
+            <Button size="lg" className="mt-6" onClick={() => setShowCarousel(true)}>
               Start Swiping
             </Button>
-          </div>
+          )}
+        </div>
+      )}
+
+      <div className="mx-auto max-w-3xl">
+        {isGuest && !showCarousel && (
+          <Card className="mb-8">
+            <CardContent className="flex flex-col items-center gap-6 py-10">
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl font-semibold">Sign up to explore all ideas</h2>
+                <p className="text-muted-foreground">
+                  Create an account to swipe, save, and unlock the full experience.
+                  <br />
+                  Or preview a few ideas below.
+                </p>
+              </div>
+              <SignInButton mode="modal">
+                <Button size="lg" className="w-full max-w-xs">
+                  Sign up / Sign in
+                </Button>
+              </SignInButton>
+              <div className="flex items-center w-full max-w-xs gap-2">
+                <div className="flex-1 h-px bg-muted" />
+                <span className="text-muted-foreground text-xs">or</span>
+                <div className="flex-1 h-px bg-muted" />
+              </div>
+              <Button size="lg" variant="outline" className="w-full max-w-xs" onClick={() => setShowCarousel(true)}>
+                Preview Ideas
+              </Button>
+            </CardContent>
+          </Card>
         )}
       </div>
 
-      <IdeaCarousel ideas={ideas} isOpen={showCarousel} onClose={() => setShowCarousel(false)} />
+      {showCarousel && <IdeaCarousel ideas={showIdeas} isOpen={showCarousel} onClose={() => setShowCarousel(false)} {...(isGuest && { isGuest: true })} />}
     </div>
   )
 }
@@ -12783,6 +12907,61 @@ import { api } from "@/convex/_generated/api";
 
 export const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 export { api }; 
+
+--- File: lib/data/mock-ideas.ts ---
+
+import type { StartupIdea } from "@/lib/data";
+
+export const mockIdeas: StartupIdea[] = [
+  {
+    id: "mock-1",
+    title: "AI-Powered Recipe Generator",
+    description: "Generate unique recipes based on ingredients you have at home.",
+    imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80",
+    srcUrl: "https://example.com/recipe",
+    createdAt: new Date(),
+  },
+  {
+    id: "mock-2",
+    title: "Virtual Study Buddy",
+    description: "Find a virtual partner to co-work and stay productive together.",
+    imageUrl: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+    srcUrl: "https://example.com/study",
+    createdAt: new Date(),
+  },
+  {
+    id: "mock-3",
+    title: "Pet Adoption Matcher",
+    description: "Swipe to find your perfect pet from local shelters.",
+    imageUrl: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=600&q=80",
+    srcUrl: "https://example.com/pet",
+    createdAt: new Date(),
+  },
+  {
+    id: "mock-4",
+    title: "Remote Team Coffee Breaks",
+    description: "Randomly pair remote teammates for virtual coffee chats.",
+    imageUrl: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
+    srcUrl: "https://example.com/coffee",
+    createdAt: new Date(),
+  },
+  {
+    id: "mock-5",
+    title: "Neighborhood Event Finder",
+    description: "Discover and join events happening near you.",
+    imageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
+    srcUrl: "https://example.com/event",
+    createdAt: new Date(),
+  },
+  {
+    id: "mock-6",
+    title: "Eco-Friendly Shopping Assistant",
+    description: "Get eco-ratings and sustainable alternatives while you shop online.",
+    imageUrl: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80",
+    srcUrl: "https://example.com/eco",
+    createdAt: new Date(),
+  },
+]; 
 
 --- File: lib/data.ts ---
 
@@ -14890,12 +15069,31 @@ export default async function globalSetup() {
 import { test, expect } from '@playwright/test';
 import { setupAuthenticatedUser, setupCleanDatabase } from './utils/test-helpers';
 
-test('should not be public', async ({ page }) => {
-  await page.goto('/explore');
-  await page.pause();
+test('should display preview for guests', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Start Swiping' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign up to explore all ideas' })).toBeVisible();
+  await page.getByRole('button', { name: 'Sign up / Sign in' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in to vibecode.party' })).toBeVisible();
+  await page.getByRole('button', { name: 'Close modal' }).click();
+  await page.getByRole('button', { name: 'Preview Ideas' }).click();
+  await page.getByRole('button').nth(1).click();
+  await page.waitForTimeout(500);
+  await page.getByRole('button').first().click();
+  await page.waitForTimeout(500);
+  await page.getByRole('button').nth(1).click();
+  await page.waitForTimeout(500);
+  await page.getByRole('button').first().click();
+  await page.waitForTimeout(500);
+  await page.getByRole('button').nth(1).click();
+  await page.waitForTimeout(500);
+  await page.getByRole('button').first().click();
+  await expect(page.getByRole('heading', { name: 'We hope you enjoyed the' })).toBeVisible();
+  await page.getByRole('button', { name: 'Sign up to Continue' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in to vibecode.party' })).toBeVisible();
 });
 
-test('should load the admin dashboard', async ({ page }) => {
+test('should swipe through ideas for authenticated user', async ({ page }) => {
   // Reset database before this test
     await setupCleanDatabase();
     
@@ -14903,8 +15101,10 @@ test('should load the admin dashboard', async ({ page }) => {
     await setupAuthenticatedUser(page);
     
     // Navigate to the page
-    await page.goto('/explore');
-    await page.pause();
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Start Swiping' }).click();
+    await expect(page.getByRole('heading', { name: 'PetMatch' })).toBeVisible();
+    await page.getByRole('button').nth(1).click();
 });
 
 --- File: tests/subscribe.spec.ts ---
@@ -15014,25 +15214,47 @@ export const TEST_USER = {
  * @param page - Playwright page object
  */
 export async function loginTestUser(page: Page): Promise<void> {
+  await page.pause();
+  console.log('[loginTestUser] Called');
+  // Mask password in logs
+  const { email, password, fullName, username, userId } = TEST_USER;
+  console.log('[loginTestUser] TEST_USER:', { email, password: password ? '***' : undefined, fullName, username, userId });
+
   // Navigate to an unprotected page that loads Clerk
   await page.goto('/');
 
   // Setup Clerk for testing
+  console.log('[loginTestUser] Running clerkSetup...');
   await clerkSetup();
+  console.log('[loginTestUser] clerkSetup complete');
 
   // Use Clerk's testing utilities to sign in
-  await clerk.signIn({
-    page,
-    signInParams: {
-      strategy: 'password',
-      identifier: TEST_USER.email,
-      password: TEST_USER.password
-    }
-  });
+  console.log('[loginTestUser] Calling clerk.signIn...');
+  try {
+    await clerk.signIn({
+      page,
+      signInParams: {
+        strategy: 'password',
+        identifier: TEST_USER.email,
+        password: TEST_USER.password
+      }
+    });
+    console.log('[loginTestUser] clerk.signIn succeeded');
+  } catch (err) {
+    console.error('[loginTestUser] clerk.signIn failed:', err);
+    throw err;
+  }
 
   // Navigate to the home page and verify we're logged in
+  console.log('[loginTestUser] Navigating to home page...');
   await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Open user button' })).toBeVisible({timeout: 30000});
+  try {
+    await expect(page.getByRole('button', { name: 'Open user button' })).toBeVisible({timeout: 30000});
+    console.log('[loginTestUser] User button is visible, login successful');
+  } catch (err) {
+    console.error('[loginTestUser] User button not visible after login:', err);
+    throw err;
+  }
 }
 
 /**
