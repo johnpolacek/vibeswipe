@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 export const create = mutation({
   args: {
@@ -56,5 +57,34 @@ export const getUserSwipedIdeaIds = query({
       .withIndex("by_user", q => q.eq("userId", args.userId))
       .collect();
     return swipes.map(s => s.ideaId);
+  },
+});
+
+export const getUserMatches = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    // Get all liked swipes for this user
+    const swipes = await ctx.db
+      .query("idea_swipes")
+      .withIndex("by_user", q => q.eq("userId", args.userId))
+      .filter(q => q.eq(q.field("liked"), true))
+      .collect();
+
+    // Get all the ideas that were liked
+    const matchedIdeas = await Promise.all(
+      swipes.map(async (swipe) => {
+        const idea = await ctx.db.get(swipe.ideaId as Id<"ideas">);
+        if (!idea) return null;
+        return {
+          ...idea,
+          swipedAt: swipe.createdAt,
+        };
+      })
+    );
+
+    // Filter out any null values and sort by most recently swiped
+    return matchedIdeas
+      .filter((idea): idea is NonNullable<typeof idea> => idea !== null)
+      .sort((a, b) => b.swipedAt - a.swipedAt);
   },
 }); 

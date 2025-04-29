@@ -5,12 +5,15 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { navItems } from "@/lib/config/navigation"
 import { GalleryHorizontalEnd } from "lucide-react"
+import { useUser } from "@clerk/nextjs"
+
 interface MainNavProps {
   isAdmin: boolean
 }
 
 export function MainNav({ isAdmin }: MainNavProps) {
   const pathname = usePathname()
+  const { isSignedIn } = useUser()
 
   return (
     <nav className="hidden md:flex md:gap-6 items-center">
@@ -27,6 +30,12 @@ export function MainNav({ isAdmin }: MainNavProps) {
           {item.title}
         </Link>
       ))}
+
+      {isSignedIn && (
+        <Link href="/matches" className={cn("text-sm mt-1 font-medium transition-colors hover:text-primary", pathname === "/matches" ? "text-primary" : "text-muted-foreground")}>
+          Matches
+        </Link>
+      )}
 
       {isAdmin && (
         <Link href="/admin" className={cn("text-sm mt-1 font-medium transition-colors hover:text-primary", pathname?.startsWith("/admin") ? "text-primary" : "text-muted-foreground")}>

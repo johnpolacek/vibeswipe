@@ -17,8 +17,7 @@ export const TEST_USER = {
  * @param page - Playwright page object
  */
 export async function loginTestUser(page: Page): Promise<void> {
-  await page.pause();
-  console.log('[loginTestUser] Called');
+  
   // Mask password in logs
   const { email, password, fullName, username, userId } = TEST_USER;
   console.log('[loginTestUser] TEST_USER:', { email, password: password ? '***' : undefined, fullName, username, userId });

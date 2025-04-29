@@ -1,6 +1,6 @@
 "use server"
 
-import { recordIdeaSwipe } from "@/lib/services/visits";
+import { recordIdeaSwipe } from "@/lib/services/ideas";
 
 export async function saveIdeaSwipe({
   userId,

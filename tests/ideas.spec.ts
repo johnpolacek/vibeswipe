@@ -35,6 +35,27 @@ test('should swipe through ideas for authenticated user', async ({ page }) => {
     // Navigate to the page
     await page.goto('/');
     await page.getByRole('button', { name: 'Start Swiping' }).click();
-    await expect(page.getByRole('heading', { name: 'PetMatch' })).toBeVisible();
+    await expect(page.locator('#idea-carousel')).toBeVisible();
     await page.getByRole('button').nth(1).click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').first().click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').nth(1).click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').first().click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').nth(1).click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').first().click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').nth(1).click();
+    await expect(page.getByRole('heading', { name: 'You\'ve seen all ideas!' })).toBeVisible();
+    await page.getByRole('link', { name: 'View Matches' }).click();
+    await expect(page.getByRole('heading', { name: 'Your Matches' }).locator('span')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your Matches' }).locator('span')).toBeVisible();
+    await expect(page.getByText('MoodTunes')).toBeVisible();
+    await expect(page.getByText('Focus Forest')).toBeVisible();
+    await expect(page.getByText('PetMatch')).toBeVisible();
+    await page.getByRole('button', { name: 'Copy PRD Prompt' }).first().click();
+    await expect(page.getByText('PRD prompt copied!').nth(1)).toBeVisible();
 });

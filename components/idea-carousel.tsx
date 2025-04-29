@@ -11,7 +11,8 @@ import type { StartupIdea } from "@/lib/data"
 import { getGradient } from "@/lib/utils"
 import { saveIdeaSwipe } from "@/app/_actions/save-idea-swipe"
 import { useUser, SignInButton } from "@clerk/nextjs"
-import { getUserSwipedIdeaIds } from "@/lib/services/visits"
+import { getUserSwipedIdeaIds } from "@/lib/services/ideas"
+import Link from "next/link"
 
 interface IdeaCarouselProps {
   ideas: StartupIdea[]
@@ -81,6 +82,18 @@ export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselPr
       return
     }
     if (!user) return // Optionally, show sign-in prompt
+
+    // Save swipe
+    try {
+      const args = {
+        userId: user.id,
+        ideaId: currentIdea.id,
+        liked: action === "like",
+        createdAt: Date.now(),
+      }
+      await saveIdeaSwipe(args)
+    } catch {}
+
     if (currentIndex < unratedIdeas.length - 1) {
       if (action === "like") {
         setLiked([...liked, currentIdea.id])
@@ -88,33 +101,23 @@ export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselPr
       } else {
         setExitX(-500)
       }
-      // Save swipe
-      try {
-        const args = {
-          userId: user.id,
-          ideaId: currentIdea.id,
-          liked: action === "like",
-          createdAt: Date.now(),
-        }
-        await saveIdeaSwipe(args)
-      } catch {}
       // Move to next idea after a short delay
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1)
         setExitX(null)
       }, 300)
     } else {
-      // Last idea: save swipe and close
-      try {
-        const args = {
-          userId: user.id,
-          ideaId: currentIdea.id,
-          liked: action === "like",
-          createdAt: Date.now(),
-        }
-        await saveIdeaSwipe(args)
-      } catch {}
-      onClose()
+      // Last idea: animate the swipe before showing completion
+      if (action === "like") {
+        setLiked([...liked, currentIdea.id])
+        setExitX(500)
+      } else {
+        setExitX(-500)
+      }
+      setTimeout(() => {
+        setCurrentIndex(currentIndex + 1)
+        setExitX(null)
+      }, 300)
     }
   }
 
@@ -150,7 +153,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselPr
             </div>
           </div>
         ) : currentIndex < unratedIdeas.length ? (
-          <div className="flex-1 overflow-hidden relative">
+          <div id="idea-carousel" className="flex-1 overflow-hidden relative bg-gradient-to-br from-black/70 to-black">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIdea.id}
@@ -200,13 +203,18 @@ export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselPr
             </AnimatePresence>
           </div>
         ) : isGuest ? null : (
-          <div className="flex-1 flex items-center justify-center p-6">
+          <div className="flex-1 flex items-center justify-center p-6 bg-background text-foreground">
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">You&apos;ve seen all ideas!</h3>
               <p className="text-gray-600 mb-4">Check back later for more or submit your own.</p>
-              <Button size="lg" onClick={onClose} className="bg-primary hover:bg-primary/90">
-                Close
-              </Button>
+              <div className="flex justify-center w-full gap-3">
+                <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+                  <Link href="/matches">View Matches</Link>
+                </Button>
+                <Button size="lg" onClick={onClose} variant="outline">
+                  Close
+                </Button>
+              </div>
             </div>
           </div>
         )}
