@@ -589,7 +589,7 @@ export async function refreshProfile(path: string) {
 
 "use server"
 
-import { recordIdeaSwipe } from "@/lib/services/visits";
+import { recordIdeaSwipe } from "@/lib/services/ideas";
 
 export async function saveIdeaSwipe({
   userId,
@@ -5279,6 +5279,60 @@ export function ContactForm({ subject = "Contact Message", onSuccess, requireCap
 }
 
 
+--- File: components/copy-prompt-buttons.tsx ---
+
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Copy, Check } from "lucide-react"
+import { generatePRDPrompt, generateDevPrompt, copyToClipboard } from "@/lib/prompts"
+import { toast } from "sonner"
+
+interface CopyPromptButtonsProps {
+  idea: {
+    name: string
+    description: string
+  }
+}
+
+export function CopyPromptButtons({ idea }: CopyPromptButtonsProps) {
+  const [copying, setCopying] = useState<"prd" | "dev" | null>(null)
+
+  const handleCopy = async (type: "prd" | "dev") => {
+    const prompt = type === "prd" ? generatePRDPrompt(idea) : generateDevPrompt(idea)
+    setCopying(type)
+
+    try {
+      await copyToClipboard(prompt)
+      toast.success(`${type === "prd" ? "PRD" : "Development"} prompt copied!`, {
+        description: "Ready to use in your favorite AI assistant",
+      })
+    } catch (error) {
+      toast.error("Failed to copy", {
+        description: "Please try again",
+      })
+    }
+
+    // Reset copying state after a short delay
+    setTimeout(() => setCopying(null), 2000)
+  }
+
+  return (
+    <div className="flex gap-3">
+      <Button variant="outline" size="sm" onClick={() => handleCopy("prd")} className="flex-1">
+        {copying === "prd" ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+        Copy PRD Prompt
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => handleCopy("dev")} className="flex-1">
+        {copying === "dev" ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+        Copy Dev Prompt
+      </Button>
+    </div>
+  )
+}
+
+
 --- File: components/demo/ai-demo-client.tsx ---
 
 "use client"
@@ -6041,6 +6095,7 @@ export function HeroSection() {
   return (
     <section className="relative w-full py-12 md:py-16 bg-gradient-to-b from-background via-primary/5 to-primary/20 overflow-hidden">
       {/* Ultra-dense ocean wavy lines SVG background */}
+      <div className="w-full h-64 absolute -bottom-24 left-0 bg-gradient-to-t from-background via-background z-10 to-transparent pointer-events-none" />
       <div className="absolute -top-4 left-0 w-full h-full pointer-events-none z-0 opacity-40 animate-wave-slow">
         <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
           <g stroke="#38bdf8" strokeWidth="0.7" opacity="0.18">
@@ -7629,7 +7684,8 @@ import type { StartupIdea } from "@/lib/data"
 import { getGradient } from "@/lib/utils"
 import { saveIdeaSwipe } from "@/app/_actions/save-idea-swipe"
 import { useUser, SignInButton } from "@clerk/nextjs"
-import { getUserSwipedIdeaIds } from "@/lib/services/visits"
+import { getUserSwipedIdeaIds } from "@/lib/services/ideas"
+import Link from "next/link"
 
 interface IdeaCarouselProps {
   ideas: StartupIdea[]
@@ -7699,6 +7755,18 @@ export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselPr
       return
     }
     if (!user) return // Optionally, show sign-in prompt
+
+    // Save swipe
+    try {
+      const args = {
+        userId: user.id,
+        ideaId: currentIdea.id,
+        liked: action === "like",
+        createdAt: Date.now(),
+      }
+      await saveIdeaSwipe(args)
+    } catch {}
+
     if (currentIndex < unratedIdeas.length - 1) {
       if (action === "like") {
         setLiked([...liked, currentIdea.id])
@@ -7706,33 +7774,23 @@ export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselPr
       } else {
         setExitX(-500)
       }
-      // Save swipe
-      try {
-        const args = {
-          userId: user.id,
-          ideaId: currentIdea.id,
-          liked: action === "like",
-          createdAt: Date.now(),
-        }
-        await saveIdeaSwipe(args)
-      } catch {}
       // Move to next idea after a short delay
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1)
         setExitX(null)
       }, 300)
     } else {
-      // Last idea: save swipe and close
-      try {
-        const args = {
-          userId: user.id,
-          ideaId: currentIdea.id,
-          liked: action === "like",
-          createdAt: Date.now(),
-        }
-        await saveIdeaSwipe(args)
-      } catch {}
-      onClose()
+      // Last idea: animate the swipe before showing completion
+      if (action === "like") {
+        setLiked([...liked, currentIdea.id])
+        setExitX(500)
+      } else {
+        setExitX(-500)
+      }
+      setTimeout(() => {
+        setCurrentIndex(currentIndex + 1)
+        setExitX(null)
+      }, 300)
     }
   }
 
@@ -7768,7 +7826,7 @@ export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselPr
             </div>
           </div>
         ) : currentIndex < unratedIdeas.length ? (
-          <div className="flex-1 overflow-hidden relative">
+          <div id="idea-carousel" className="flex-1 overflow-hidden relative bg-gradient-to-br from-black/70 to-black">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIdea.id}
@@ -7818,13 +7876,18 @@ export function IdeaCarousel({ ideas, isOpen, onClose, isGuest }: IdeaCarouselPr
             </AnimatePresence>
           </div>
         ) : isGuest ? null : (
-          <div className="flex-1 flex items-center justify-center p-6">
+          <div className="flex-1 flex items-center justify-center p-6 bg-background text-foreground">
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">You&apos;ve seen all ideas!</h3>
               <p className="text-gray-600 mb-4">Check back later for more or submit your own.</p>
-              <Button size="lg" onClick={onClose} className="bg-primary hover:bg-primary/90">
-                Close
-              </Button>
+              <div className="flex justify-center w-full gap-3">
+                <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+                  <Link href="/matches">View Matches</Link>
+                </Button>
+                <Button size="lg" onClick={onClose} variant="outline">
+                  Close
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -7918,208 +7981,6 @@ export function IdeaDetailModal({ idea, isOpen, onClose, onLike, onDislike, onSa
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
-
-
---- File: components/idea-swiper.tsx ---
-
-"use client"
-
-import Link from "next/link"
-import Image from "next/image"
-import { useState } from "react"
-import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from "motion/react"
-import { Check, X, Star, MessageCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { IdeaCarousel } from "@/components/idea-carousel"
-import type { StartupIdea } from "@/lib/data"
-
-interface IdeaSwiperProps {
-  ideas: StartupIdea[]
-}
-
-export function IdeaSwiper({ ideas }: IdeaSwiperProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [direction, setDirection] = useState<string | null>(null)
-  const [liked, setLiked] = useState<number[]>([])
-  const [saved, setSaved] = useState<number[]>([])
-  const [showCarousel, setShowCarousel] = useState(false)
-
-  const currentIdea = ideas[currentIndex]
-
-  // Motion values for swipe
-  const x = useMotionValue(0)
-  const rotate = useTransform(x, [-200, 0, 200], [-10, 0, 10])
-  const likeOpacity = useTransform(x, [0, 100], [0, 1])
-  const nopeOpacity = useTransform(x, [-100, 0], [1, 0])
-
-  const handleSwipe = (dir: string) => {
-    if (currentIndex < ideas.length - 1) {
-      setDirection(dir)
-
-      if (dir === "right") {
-        setLiked([...liked, Number(currentIdea.id)])
-      }
-
-      // After animation completes, the index will be updated in onExitComplete
-    } else {
-      // Reset to beginning if we've gone through all ideas
-      setCurrentIndex(0)
-    }
-  }
-
-  const handleSave = () => {
-    if (!saved.includes(Number(currentIdea.id))) {
-      setSaved([...saved, Number(currentIdea.id)])
-    } else {
-      setSaved(saved.filter((id) => id !== Number(currentIdea.id)))
-    }
-  }
-
-  const onExitComplete = () => {
-    setCurrentIndex((prevIndex) => prevIndex + 1)
-    setDirection(null)
-    x.set(0) // Reset position
-  }
-
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.x > 100) {
-      handleSwipe("right")
-    } else if (info.offset.x < -100) {
-      handleSwipe("left")
-    }
-  }
-
-  const variants = {
-    enter: (direction: string) => {
-      return {
-        x: direction === "right" ? 300 : -300,
-        opacity: 0,
-        scale: 0.8,
-      }
-    },
-    center: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.3,
-      },
-    },
-    exit: (direction: string) => {
-      return {
-        x: direction === "right" ? 300 : -300,
-        opacity: 0,
-        scale: 0.8,
-        transition: {
-          duration: 0.3,
-        },
-      }
-    },
-  }
-
-  // Generate a gradient based on the idea's id
-  const getGradient = (id: number) => {
-    const gradients = [
-      "from-pink-500 to-purple-500",
-      "from-blue-500 to-teal-500",
-      "from-green-500 to-emerald-500",
-      "from-yellow-500 to-orange-500",
-      "from-purple-500 to-indigo-500",
-      "from-red-500 to-pink-500",
-    ]
-    return gradients[id % gradients.length]
-  }
-
-  return (
-    <>
-      <div className="relative h-[600px] w-full max-w-sm mx-auto">
-        <AnimatePresence custom={direction} onExitComplete={onExitComplete}>
-          {currentIndex < ideas.length && (
-            <motion.div
-              key={currentIdea.id}
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="absolute w-full"
-              style={{ x, rotate }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              onDragEnd={handleDragEnd}
-            >
-              <Card className="w-full h-[600px] overflow-hidden relative">
-                {/* Like/Nope Overlays */}
-                <motion.div className="absolute top-10 right-10 z-10 rotate-12 border-4 border-green-500 text-green-500 px-4 py-1 rounded-lg text-2xl font-bold" style={{ opacity: likeOpacity }}>
-                  LIKE
-                </motion.div>
-                <motion.div className="absolute top-10 left-10 z-10 -rotate-12 border-4 border-red-500 text-red-500 px-4 py-1 rounded-lg text-2xl font-bold" style={{ opacity: nopeOpacity }}>
-                  NOPE
-                </motion.div>
-
-                <CardContent className="p-0 h-full flex flex-col">
-                  {currentIdea.imageUrl ? (
-                    <div className="relative h-[400px] w-full">
-                      <Image src={currentIdea.imageUrl || "/placeholder.svg"} alt={currentIdea.title} fill className="object-cover" onClick={() => setShowCarousel(true)} />
-                    </div>
-                  ) : (
-                    <div className={`h-[400px] w-full bg-gradient-to-br ${getGradient(Number(currentIdea.id))}`} onClick={() => setShowCarousel(true)} />
-                  )}
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-xl font-bold line-clamp-1">{currentIdea.title}</h3>
-                      <Button variant="ghost" size="icon" className={`rounded-full ${saved.includes(Number(currentIdea.id)) ? "text-yellow-500" : ""}`} onClick={handleSave}>
-                        <Star className={saved.includes(Number(currentIdea.id)) ? "fill-yellow-500" : ""} size={20} />
-                      </Button>
-                    </div>
-                    <p className="text-gray-600 flex-1 text-sm line-clamp-3">{currentIdea.description}</p>
-                    <div className="flex justify-between mt-4">
-                      <Button variant="outline" size="icon" className="rounded-full h-12 w-12 border-2 border-red-500 text-red-500" onClick={() => handleSwipe("left")}>
-                        <X size={24} />
-                      </Button>
-                      <Button variant="outline" size="icon" className="rounded-full h-12 w-12 border-2 border-blue-500 text-blue-500" onClick={() => setShowCarousel(true)}>
-                        <MessageCircle size={24} />
-                      </Button>
-                      <Button variant="outline" size="icon" className="rounded-full h-12 w-12 border-2 border-green-500 text-green-500" onClick={() => handleSwipe("right")}>
-                        <Check size={24} />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {currentIndex >= ideas.length && (
-          <Card className="w-full h-[600px] flex items-center justify-center">
-            <CardContent className="text-center p-6">
-              <h3 className="text-xl font-bold mb-2">You&apos;ve seen all ideas!</h3>
-              <p className="text-gray-600 mb-4">Check back later for more or submit your own.</p>
-              <Button onClick={() => setCurrentIndex(0)} className="bg-green-500 hover:bg-green-600">
-                Start Over
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {liked.length > 0 && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-500">
-              You&apos;ve liked {liked.length} idea{liked.length !== 1 ? "s" : ""}.
-              <Link href="/matches" className="text-green-500 ml-1 hover:underline">
-                View your matches
-              </Link>
-            </p>
-          </div>
-        )}
-      </div>
-
-      {currentIndex < ideas.length && <IdeaCarousel ideas={ideas.slice(currentIndex)} isOpen={showCarousel} onClose={() => setShowCarousel(false)} />}
-    </>
   )
 }
 
@@ -8289,12 +8150,15 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { navItems } from "@/lib/config/navigation"
 import { GalleryHorizontalEnd } from "lucide-react"
+import { useUser } from "@clerk/nextjs"
+
 interface MainNavProps {
   isAdmin: boolean
 }
 
 export function MainNav({ isAdmin }: MainNavProps) {
   const pathname = usePathname()
+  const { isSignedIn } = useUser()
 
   return (
     <nav className="hidden md:flex md:gap-6 items-center">
@@ -8311,6 +8175,12 @@ export function MainNav({ isAdmin }: MainNavProps) {
           {item.title}
         </Link>
       ))}
+
+      {isSignedIn && (
+        <Link href="/matches" className={cn("text-sm mt-1 font-medium transition-colors hover:text-primary", pathname === "/matches" ? "text-primary" : "text-muted-foreground")}>
+          Matches
+        </Link>
+      )}
 
       {isAdmin && (
         <Link href="/admin" className={cn("text-sm mt-1 font-medium transition-colors hover:text-primary", pathname?.startsWith("/admin") ? "text-primary" : "text-muted-foreground")}>
@@ -8626,7 +8496,7 @@ export function TrendingIdeasSection() {
   const trendingIdeas = getTrendingIdeas(3)
 
   return (
-    <section className="bg-white py-12 md:py-20">
+    <section className="bg-gradient-to-b from-background to-transparent py-12 md:py-20">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-10">
           <div>
@@ -9333,7 +9203,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 function Card({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="card" className={cn("bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-xs", className)} {...props} />
+  return <div data-slot="card" className={cn("bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-xs overflow-hidden", className)} {...props} />
 }
 
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
@@ -10997,65 +10867,64 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { MessageCircle, Star, Users } from "lucide-react"
-import { getMatchedIdeas, getSavedIdeas } from "@/lib/data"
+import { getUserMatches } from "@/lib/services/ideas"
+import { auth } from "@clerk/nextjs/server"
+import { SignInButton } from "@clerk/nextjs"
+import { getGradient } from "@/lib/utils"
+import { CopyPromptButtons } from "@/components/copy-prompt-buttons"
+import { Toaster } from "sonner"
 
-export function MatchesView() {
-  const matchedIdeas = getMatchedIdeas()
-  const savedIdeas = getSavedIdeas()
+export async function MatchesView() {
+  const { userId } = await auth()
 
-  // Generate a gradient based on the idea's id
-  const getGradient = (id: number) => {
-    const gradients = [
-      "from-pink-500 to-purple-500",
-      "from-blue-500 to-teal-500",
-      "from-green-500 to-emerald-500",
-      "from-yellow-500 to-orange-500",
-      "from-purple-500 to-indigo-500",
-      "from-red-500 to-pink-500",
-    ]
-    return gradients[id % gradients.length]
+  if (!userId) {
+    return (
+      <div className="container max-w-4xl px-4 py-12 md:px-6 md:py-24">
+        <Card className="p-6 text-center">
+          <p className="text-gray-500 mb-4">Sign in to see your matches</p>
+          <SignInButton mode="modal">
+            <Button className="bg-primary hover:bg-primary/90">Sign in</Button>
+          </SignInButton>
+        </Card>
+      </div>
+    )
   }
+
+  const matchedIdeas = await getUserMatches(userId)
 
   return (
     <div className="container max-w-4xl px-4 py-12 md:px-6 md:py-24">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">
-          Your <span className="text-green-500">Matches</span> & Saved Ideas
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl mb-4">
+          Your <span className="text-primary">Matches</span>
         </h1>
-        <p className="max-w-[600px] mx-auto text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Connect with potential co-founders and explore ideas you&apos;ve saved.</p>
+        <p className="max-w-[600px] text-balance mx-auto text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+          Ideas you&apos;ve matched with. Use the prompts to generate a PRD or get development guidance.
+        </p>
       </div>
 
       <div className="space-y-12">
         <section>
-          <h2 className="text-2xl font-bold mb-6">Your Matches</h2>
           <div className="grid gap-6 md:grid-cols-2">
             {matchedIdeas.map((idea) => (
-              <Card key={idea.id}>
+              <Card className="pt-0 overflow-hidden" key={idea._id}>
                 {idea.imageUrl ? (
                   <div className="relative aspect-[9/16] w-full max-h-[200px]">
-                    <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
+                    <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.name} fill className="object-cover" />
                   </div>
                 ) : (
-                  <div className={`aspect-[9/16] w-full max-h-[200px] bg-gradient-to-br ${getGradient(Number(idea.id))}`} />
+                  <div className={`aspect-[9/16] w-full max-h-[200px] bg-gradient-to-br ${getGradient(idea._id)}`} />
                 )}
                 <CardHeader>
                   <div className="flex justify-between items-start">
-                    <CardTitle>{idea.title}</CardTitle>
+                    <CardTitle className="text-xl">{idea.name}</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="-mt-4">
                   <p className="text-gray-600 line-clamp-3">{idea.description}</p>
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" size="sm">
-                    <Users className="mr-2 h-4 w-4" />
-                    View Matches
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Discuss
-                  </Button>
+                <CardFooter>
+                  <CopyPromptButtons idea={idea} />
                 </CardFooter>
               </Card>
             ))}
@@ -11070,50 +10939,8 @@ export function MatchesView() {
             </Card>
           )}
         </section>
-
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Saved Ideas</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            {savedIdeas.map((idea) => (
-              <Card key={idea.id}>
-                {idea.imageUrl ? (
-                  <div className="relative aspect-[9/16] w-full max-h-[200px]">
-                    <Image src={idea.imageUrl || "/placeholder.svg"} alt={idea.title} fill className="object-cover" />
-                  </div>
-                ) : (
-                  <div className={`aspect-[9/16] w-full max-h-[200px] bg-gradient-to-br ${getGradient(Number(idea.id))}`} />
-                )}
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <CardTitle>{idea.title}</CardTitle>
-                    <Button variant="ghost" size="icon" className="text-yellow-500">
-                      <Star className="fill-yellow-500" size={20} />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 line-clamp-3">{idea.description}</p>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" size="sm">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Discuss
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-
-          {savedIdeas.length === 0 && (
-            <Card className="p-6 text-center">
-              <p className="text-gray-500 mb-4">You haven&apos;t saved any ideas yet.</p>
-              <Link href="/explore">
-                <Button className="bg-green-500 hover:bg-green-600">Explore Ideas</Button>
-              </Link>
-            </Card>
-          )}
-        </section>
       </div>
+      <Toaster richColors closeButton position="top-center" />
     </div>
   )
 }
@@ -11966,6 +11793,7 @@ export const httpAction = httpActionGeneric;
 
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 export const create = mutation({
   args: {
@@ -12022,6 +11850,35 @@ export const getUserSwipedIdeaIds = query({
       .withIndex("by_user", q => q.eq("userId", args.userId))
       .collect();
     return swipes.map(s => s.ideaId);
+  },
+});
+
+export const getUserMatches = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    // Get all liked swipes for this user
+    const swipes = await ctx.db
+      .query("idea_swipes")
+      .withIndex("by_user", q => q.eq("userId", args.userId))
+      .filter(q => q.eq(q.field("liked"), true))
+      .collect();
+
+    // Get all the ideas that were liked
+    const matchedIdeas = await Promise.all(
+      swipes.map(async (swipe) => {
+        const idea = await ctx.db.get(swipe.ideaId as Id<"ideas">);
+        if (!idea) return null;
+        return {
+          ...idea,
+          swipedAt: swipe.createdAt,
+        };
+      })
+    );
+
+    // Filter out any null values and sort by most recently swiped
+    return matchedIdeas
+      .filter((idea): idea is NonNullable<typeof idea> => idea !== null)
+      .sort((a, b) => b.swipedAt - a.swipedAt);
   },
 }); 
 
@@ -13172,6 +13029,51 @@ export const validRoutes = new Set([
 ])
 
 
+--- File: lib/prompts.ts ---
+
+export function generatePRDPrompt(idea: { name: string; description: string }) {
+  return `Please help me write a detailed Product Requirements Document (PRD) for the following startup idea. Ask any followup questions you need to clarify the requirements.
+
+Project: ${idea.name}
+Description: ${idea.description}
+
+Please include the following sections:
+1. Problem Statement
+2. Target Users/Market
+3. Solution Overview
+4. Key Features & Requirements
+5. User Stories
+6. Success Metrics
+7. Technical Requirements
+8. MVP Scope
+9. Future Considerations
+
+Please be specific and actionable in your response, focusing on practical implementation details while maintaining the core vision of the idea.`
+}
+
+export function generateDevPrompt(idea: { name: string; description: string }) {
+  return `I want to build the following startup idea as a full-stack web application:
+
+Project: ${idea.name}
+Description: ${idea.description}
+
+Please help me with:
+1. A recommended tech stack with modern, production-ready technologies
+2. Initial project setup instructions
+3. Core features to implement for an MVP
+4. Basic architecture and data model
+5. Key implementation considerations and potential challenges
+6. Development roadmap broken down into phases
+
+Please be specific and provide actionable steps I can follow to start building this project.`
+}
+
+export function copyToClipboard(text: string) {
+  if (typeof window !== 'undefined') {
+    navigator.clipboard.writeText(text)
+  }
+} 
+
 --- File: lib/s3-utils.ts ---
 
 import { PutObjectCommand } from "@aws-sdk/client-s3"
@@ -13288,6 +13190,27 @@ export async function sendEmail({ to, subject, text, html }: SendEmailOptions) {
   }
 } 
 
+--- File: lib/services/ideas.ts ---
+
+import { convex, api } from "@/lib/convex/server";
+
+export async function recordIdeaSwipe(data: {
+  ideaId: string;
+  userId: string;
+  liked: boolean;
+  createdAt: number;
+}) {
+  return await convex.mutation(api.ideas.recordSwipe, data);
+}
+
+export async function getUserSwipedIdeaIds(userId: string) {
+  return await convex.query(api.ideas.getUserSwipedIdeaIds, { userId });
+}
+
+export async function getUserMatches(userId: string) {
+  return await convex.query(api.ideas.getUserMatches, { userId });
+} 
+
 --- File: lib/services/mailing-list.ts ---
 
 import { convex, api } from "@/lib/convex/server";
@@ -13386,19 +13309,6 @@ export async function getVisitsByPath(path: string, limit?: number) {
 export async function getAllVisits(limit?: number) {
   return await convex.query(api.visits.getVisits, { limit });
 }
-
-export async function recordIdeaSwipe(data: {
-  ideaId: string;
-  userId: string;
-  liked: boolean;
-  createdAt: number;
-}) {
-  return await convex.mutation(api.ideas.recordSwipe, data);
-}
-
-export async function getUserSwipedIdeaIds(userId: string) {
-  return await convex.query(api.ideas.getUserSwipedIdeaIds, { userId });
-} 
 
 --- File: lib/stripe.ts ---
 
@@ -15103,8 +15013,29 @@ test('should swipe through ideas for authenticated user', async ({ page }) => {
     // Navigate to the page
     await page.goto('/');
     await page.getByRole('button', { name: 'Start Swiping' }).click();
-    await expect(page.getByRole('heading', { name: 'PetMatch' })).toBeVisible();
+    await expect(page.locator('#idea-carousel')).toBeVisible();
     await page.getByRole('button').nth(1).click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').first().click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').nth(1).click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').first().click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').nth(1).click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').first().click();
+    await page.waitForTimeout(1000);
+    await page.getByRole('button').nth(1).click();
+    await expect(page.getByRole('heading', { name: 'You\'ve seen all ideas!' })).toBeVisible();
+    await page.getByRole('link', { name: 'View Matches' }).click();
+    await expect(page.getByRole('heading', { name: 'Your Matches' }).locator('span')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your Matches' }).locator('span')).toBeVisible();
+    await expect(page.getByText('MoodTunes')).toBeVisible();
+    await expect(page.getByText('Focus Forest')).toBeVisible();
+    await expect(page.getByText('PetMatch')).toBeVisible();
+    await page.getByRole('button', { name: 'Copy PRD Prompt' }).first().click();
+    await expect(page.getByText('PRD prompt copied!').nth(1)).toBeVisible();
 });
 
 --- File: tests/subscribe.spec.ts ---
@@ -15214,8 +15145,7 @@ export const TEST_USER = {
  * @param page - Playwright page object
  */
 export async function loginTestUser(page: Page): Promise<void> {
-  await page.pause();
-  console.log('[loginTestUser] Called');
+  
   // Mask password in logs
   const { email, password, fullName, username, userId } = TEST_USER;
   console.log('[loginTestUser] TEST_USER:', { email, password: password ? '***' : undefined, fullName, username, userId });
