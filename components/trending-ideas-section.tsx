@@ -10,7 +10,7 @@ export function TrendingIdeasSection() {
   const trendingIdeas = getTrendingIdeas(3)
 
   return (
-    <section className="bg-white py-12 md:py-20">
+    <section className="bg-gradient-to-b from-background to-transparent py-12 md:py-20">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-10">
           <div>

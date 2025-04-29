@@ -8,6 +8,7 @@ export function HeroSection() {
   return (
     <section className="relative w-full py-12 md:py-16 bg-gradient-to-b from-background via-primary/5 to-primary/20 overflow-hidden">
       {/* Ultra-dense ocean wavy lines SVG background */}
+      <div className="w-full h-64 absolute -bottom-24 left-0 bg-gradient-to-t from-background via-background z-10 to-transparent pointer-events-none" />
       <div className="absolute -top-4 left-0 w-full h-full pointer-events-none z-0 opacity-40 animate-wave-slow">
         <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="none">
           <g stroke="#38bdf8" strokeWidth="0.7" opacity="0.18">
