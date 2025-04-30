@@ -42,7 +42,7 @@ export function MailingListSubscriberTable({ subscribers }: MailingListSubscribe
             <TableRow key={subscriber.id}>
               <TableCell>{subscriber.email}</TableCell>
               <TableCell>{subscriber.name || "-"}</TableCell>
-              <TableCell>{formatDate(subscriber.subscribedAt)}</TableCell>
+              <TableCell>{formatDate(new Date(subscriber.subscribedAt).getTime())}</TableCell>
               <TableCell>{subscriber.unsubscribedAt ? <Badge variant="destructive">Unsubscribed</Badge> : <Badge variant="default">Active</Badge>}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
