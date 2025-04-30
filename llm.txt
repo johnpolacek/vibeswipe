@@ -12162,6 +12162,52 @@ export default defineSchema({
 
 import { mutation } from "./_generated/server";
 
+// Export the seed data so it can be used by other modules
+export const seedIdeas = [
+  {
+    name: "MoodTunes",
+    description: "A music player that generates playlists based on your current mood using AI emotion detection.",
+    imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4",
+    srcUrl: "https://github.com/example/moodtunes",
+  },
+  {
+    name: "PlantPal",
+    description: "An app that helps you care for your houseplants with reminders, watering schedules, and plant identification.",
+    imageUrl: "https://images.unsplash.com/photo-1628246498566-c846ce32a5b5",
+    srcUrl: "https://github.com/example/plantpal",
+  },
+  {
+    name: "VibeSwipe",
+    description: "Swipe through creative project ideas and vibe the ones you love. Like Tinder, but for side projects!",
+    imageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+    srcUrl: "https://github.com/example/vibeswipe",
+  },
+  {
+    name: "Recipe Remix",
+    description: "Input your pantry ingredients and get AI-generated creative recipes you can cook tonight.",
+    imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+    srcUrl: "https://github.com/example/reciperemix",
+  },
+  {
+    name: "Focus Forest",
+    description: "A productivity timer that grows a virtual forest as you stay focused. Lose focus, lose trees!",
+    imageUrl: "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99",
+    srcUrl: "https://github.com/example/focusforest",
+  },
+  {
+    name: "TravelBack",
+    description: "See what your city looked like 100 years ago with historical map overlays and photos.",
+    imageUrl: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca",
+    srcUrl: "https://github.com/example/travelback",
+  },
+  {
+    name: "PetMatch",
+    description: "Find your perfect pet match by swiping through adoptable pets from local shelters.",
+    imageUrl: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d",
+    srcUrl: "https://github.com/example/petmatch",
+  },
+];
+
 export const seed = mutation({
   args: {},
   handler: async (ctx, args) => {
@@ -12172,68 +12218,13 @@ export const seed = mutation({
       return;
     }
 
-    const ideas = [
-      {
-        name: "MoodTunes",
-        description: "A music player that generates playlists based on your current mood using AI emotion detection.",
-        imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4",
-        srcUrl: "https://github.com/example/moodtunes",
+    // Insert all ideas with timestamps
+    for (const idea of seedIdeas) {
+      await ctx.db.insert("ideas", {
+        ...idea,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-      },
-      {
-        name: "PlantPal",
-        description: "An app that helps you care for your houseplants with reminders, watering schedules, and plant identification.",
-        imageUrl: "https://images.unsplash.com/photo-1628246498566-c846ce32a5b5",
-        srcUrl: "https://github.com/example/plantpal",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-      {
-        name: "VibeSwipe",
-        description: "Swipe through creative project ideas and vibe the ones you love. Like Tinder, but for side projects!",
-        imageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-        srcUrl: "https://github.com/example/vibeswipe",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Recipe Remix",
-        description: "Input your pantry ingredients and get AI-generated creative recipes you can cook tonight.",
-        imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-        srcUrl: "https://github.com/example/reciperemix",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Focus Forest",
-        description: "A productivity timer that grows a virtual forest as you stay focused. Lose focus, lose trees!",
-        imageUrl: "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99",
-        srcUrl: "https://github.com/example/focusforest",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-      {
-        name: "TravelBack",
-        description: "See what your city looked like 100 years ago with historical map overlays and photos.",
-        imageUrl: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca",
-        srcUrl: "https://github.com/example/travelback",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-      {
-        name: "PetMatch",
-        description: "Find your perfect pet match by swiping through adoptable pets from local shelters.",
-        imageUrl: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d",
-        srcUrl: "https://github.com/example/petmatch",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-    ];
-
-    // Insert all ideas
-    for (const idea of ideas) {
-      await ctx.db.insert("ideas", idea);
+      });
     }
     console.log("Seeded ideas.");
   },
@@ -12243,9 +12234,10 @@ export const seed = mutation({
 
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
+import { seedIdeas } from "./seed"
 
 // Define allowed table names for type safety
-const ALLOWED_TABLES = ["visits", "mailing_list_subscriptions", "idea_swipes"] as const
+const ALLOWED_TABLES = ["visits", "mailing_list_subscriptions", "idea_swipes", "ideas"] as const
 type TableName = typeof ALLOWED_TABLES[number]
 
 function isTestOrDevEnv() {
@@ -12260,7 +12252,8 @@ export const deleteAll = mutation({
   args: { tableName: v.union(
     v.literal("visits"),
     v.literal("mailing_list_subscriptions"),
-    v.literal("idea_swipes")
+    v.literal("idea_swipes"),
+    v.literal("ideas")
   ) },
   handler: async (ctx, args) => {
     if (!isTestOrDevEnv()) {
@@ -12282,7 +12275,8 @@ export const countDocuments = query({
   args: { tableName: v.union(
     v.literal("visits"),
     v.literal("mailing_list_subscriptions"),
-    v.literal("idea_swipes")
+    v.literal("idea_swipes"),
+    v.literal("ideas")
   ) },
   handler: async (ctx, args) => {
     if (!isTestOrDevEnv()) {
@@ -12303,6 +12297,22 @@ export const seedTestData = mutation({
     if (!isTestOrDevEnv()) {
       throw new Error("This operation is only allowed in test or development environments");
     }
+    
+    // Seed all ideas
+    await ctx.db.query("ideas").collect().then(async (ideas) => {
+      if (ideas.length === 0) {
+        const now = Date.now();
+        // Insert all ideas with timestamps
+        for (const idea of seedIdeas) {
+          await ctx.db.insert("ideas", {
+            ...idea,
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+      }
+    });
+
     // Seed visits
     await ctx.db.insert("visits", {
       path: "/test-path",
@@ -12311,6 +12321,7 @@ export const seedTestData = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+    
     // Seed mailing list subscriptions
     await ctx.db.insert("mailing_list_subscriptions", {
       userId: "test-user",
@@ -12322,6 +12333,7 @@ export const seedTestData = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+    
     return { success: true };
   },
 }); 
@@ -12505,6 +12517,131 @@ export const deleteVisit = mutation({
     await ctx.db.delete(args.id);
   },
 }); 
+
+--- File: data/productivity_ideas.json ---
+
+[
+  {
+    "name": "FocusFlow",
+    "description": "A distraction blocker that uses AI to detect when you're losing focus and gently nudges you back on track.",
+    "imageUrl": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/focusflow"
+  },
+  {
+    "name": "TaskTide",
+    "description": "A to-do app that visualizes your daily tasks as waves, encouraging you to ride the productivity tide.",
+    "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/tasktide"
+  },
+  {
+    "name": "ZenWriter",
+    "description": "A minimalist writing app with ambient sounds and focus modes to help you get into the writing zone.",
+    "imageUrl": "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/zenwriter"
+  },
+  {
+    "name": "HabitHarbor",
+    "description": "Track habits and build streaks with a calming harbor theme and gentle reminders.",
+    "imageUrl": "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/habitharbor"
+  },
+  {
+    "name": "TimeGarden",
+    "description": "Grow a virtual garden as you complete tasks and stay productive throughout the day.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/timegarden"
+  },
+  {
+    "name": "MeetingMinder",
+    "description": "Smart meeting scheduler that finds the best time for everyone and sends reminders with a friendly vibe.",
+    "imageUrl": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/meetingminder"
+  },
+  {
+    "name": "IdeaNest",
+    "description": "A collaborative space for brainstorming and organizing ideas with mind maps and sticky notes.",
+    "imageUrl": "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/ideanest"
+  },
+  {
+    "name": "BreakBuddy",
+    "description": "Reminds you to take healthy breaks and suggests quick activities to recharge your mind.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/breakbuddy"
+  },
+  {
+    "name": "InboxZeroHero",
+    "description": "Gamifies your email inbox, helping you reach inbox zero with fun challenges and rewards.",
+    "imageUrl": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/inboxzerohero"
+  },
+  {
+    "name": "PomodoroPal",
+    "description": "A playful Pomodoro timer with customizable themes and productivity stats.",
+    "imageUrl": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/pomodoropal"
+  },
+  {
+    "name": "ClarityBoard",
+    "description": "A digital whiteboard for organizing thoughts, tasks, and projects visually.",
+    "imageUrl": "https://images.unsplash.com/photo-1515168833906-d2a3b82b3029?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/clarityboard"
+  },
+  {
+    "name": "SyncSpace",
+    "description": "A real-time collaboration tool for remote teams to sync up and share progress.",
+    "imageUrl": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/syncspace"
+  },
+  {
+    "name": "GoalGlider",
+    "description": "Set, track, and celebrate your goals with a smooth, animated interface.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/goalglider"
+  },
+  {
+    "name": "RoutineRhythm",
+    "description": "Build and maintain daily routines with music and rhythm-based reminders.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/routinerhythm"
+  },
+  {
+    "name": "QuickCapture",
+    "description": "Instantly capture notes, links, and ideas with a single click and organize them later.",
+    "imageUrl": "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/quickcapture"
+  },
+  {
+    "name": "ProjectPulse",
+    "description": "Monitor your project's health and progress with real-time dashboards and alerts.",
+    "imageUrl": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/projectpulse"
+  },
+  {
+    "name": "MindfulMinutes",
+    "description": "Track your mindfulness and meditation sessions to boost productivity and well-being.",
+    "imageUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/mindfulminutes"
+  },
+  {
+    "name": "FileFerry",
+    "description": "A drag-and-drop file organizer that helps you keep your digital workspace tidy.",
+    "imageUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/fileferry"
+  },
+  {
+    "name": "CalendarCanvas",
+    "description": "A creative calendar app that lets you paint your schedule and visualize your time.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/calendarcanvas"
+  },
+  {
+    "name": "EnergyEcho",
+    "description": "Track your energy levels throughout the day and get personalized productivity tips.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/energyecho"
+  }
+] 
 
 --- File: eslint.config.mjs ---
 
@@ -15020,6 +15157,23 @@ test('should load the admin dashboard', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Admin Dashboard' })).toBeVisible();
 });
 
+test('can upload ideas', async ({ page }) => {
+  // Reset database before this test
+    await setupCleanDatabase();
+    
+    // Login as test user
+    await setupAuthenticatedUser(page);
+
+    // Navigate to the page
+    await page.goto('/admin/ideas');
+    await expect(page.getByRole('heading', { name: 'Manage Ideas' })).toBeVisible();
+    await page.setInputFiles('input[type="file"]', 'tests/fixtures/productivity_ideas.json');
+    await page.getByRole('button', { name: 'Import' }).click();
+    await expect(page.getByText('Successfully imported 20 ideas')).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'FocusFlow' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'A distraction blocker that' })).toBeVisible();
+});
+
 test('can view analytics', async ({ page }) => {
   // Reset database before this test
     await setupCleanDatabase();
@@ -15073,6 +15227,131 @@ test('should be able to fill out the contact form', async ({ page }) => {
 });
 
 
+--- File: tests/fixtures/productivity_ideas.json ---
+
+[
+  {
+    "name": "FocusFlow",
+    "description": "A distraction blocker that uses AI to detect when you're losing focus and gently nudges you back on track.",
+    "imageUrl": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/focusflow"
+  },
+  {
+    "name": "TaskTide",
+    "description": "A to-do app that visualizes your daily tasks as waves, encouraging you to ride the productivity tide.",
+    "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/tasktide"
+  },
+  {
+    "name": "ZenWriter",
+    "description": "A minimalist writing app with ambient sounds and focus modes to help you get into the writing zone.",
+    "imageUrl": "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/zenwriter"
+  },
+  {
+    "name": "HabitHarbor",
+    "description": "Track habits and build streaks with a calming harbor theme and gentle reminders.",
+    "imageUrl": "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/habitharbor"
+  },
+  {
+    "name": "TimeGarden",
+    "description": "Grow a virtual garden as you complete tasks and stay productive throughout the day.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/timegarden"
+  },
+  {
+    "name": "MeetingMinder",
+    "description": "Smart meeting scheduler that finds the best time for everyone and sends reminders with a friendly vibe.",
+    "imageUrl": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/meetingminder"
+  },
+  {
+    "name": "IdeaNest",
+    "description": "A collaborative space for brainstorming and organizing ideas with mind maps and sticky notes.",
+    "imageUrl": "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/ideanest"
+  },
+  {
+    "name": "BreakBuddy",
+    "description": "Reminds you to take healthy breaks and suggests quick activities to recharge your mind.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/breakbuddy"
+  },
+  {
+    "name": "InboxZeroHero",
+    "description": "Gamifies your email inbox, helping you reach inbox zero with fun challenges and rewards.",
+    "imageUrl": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/inboxzerohero"
+  },
+  {
+    "name": "PomodoroPal",
+    "description": "A playful Pomodoro timer with customizable themes and productivity stats.",
+    "imageUrl": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/pomodoropal"
+  },
+  {
+    "name": "ClarityBoard",
+    "description": "A digital whiteboard for organizing thoughts, tasks, and projects visually.",
+    "imageUrl": "https://images.unsplash.com/photo-1515168833906-d2a3b82b3029?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/clarityboard"
+  },
+  {
+    "name": "SyncSpace",
+    "description": "A real-time collaboration tool for remote teams to sync up and share progress.",
+    "imageUrl": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/syncspace"
+  },
+  {
+    "name": "GoalGlider",
+    "description": "Set, track, and celebrate your goals with a smooth, animated interface.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/goalglider"
+  },
+  {
+    "name": "RoutineRhythm",
+    "description": "Build and maintain daily routines with music and rhythm-based reminders.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/routinerhythm"
+  },
+  {
+    "name": "QuickCapture",
+    "description": "Instantly capture notes, links, and ideas with a single click and organize them later.",
+    "imageUrl": "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/quickcapture"
+  },
+  {
+    "name": "ProjectPulse",
+    "description": "Monitor your project's health and progress with real-time dashboards and alerts.",
+    "imageUrl": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/projectpulse"
+  },
+  {
+    "name": "MindfulMinutes",
+    "description": "Track your mindfulness and meditation sessions to boost productivity and well-being.",
+    "imageUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/mindfulminutes"
+  },
+  {
+    "name": "FileFerry",
+    "description": "A drag-and-drop file organizer that helps you keep your digital workspace tidy.",
+    "imageUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/fileferry"
+  },
+  {
+    "name": "CalendarCanvas",
+    "description": "A creative calendar app that lets you paint your schedule and visualize your time.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/calendarcanvas"
+  },
+  {
+    "name": "EnergyEcho",
+    "description": "Track your energy levels throughout the day and get personalized productivity tips.",
+    "imageUrl": "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=800&q=80",
+    "srcUrl": "https://github.com/example/energyecho"
+  }
+] 
+
 --- File: tests/global-setup.ts ---
 
 import { setupTestDatabase } from "./utils/db-reset"
@@ -15087,7 +15366,7 @@ export default async function globalSetup() {
 --- File: tests/ideas.spec.ts ---
 
 import { test, expect } from '@playwright/test';
-import { setupAuthenticatedUser, setupCleanDatabase } from './utils/test-helpers';
+import { setupAuthenticatedUser, setupSeededDatabase } from './utils/test-helpers';
 
 test('should display preview for guests', async ({ page }) => {
   await page.goto('/');
@@ -15114,38 +15393,38 @@ test('should display preview for guests', async ({ page }) => {
 });
 
 test('should swipe through ideas for authenticated user', async ({ page }) => {
-  // Reset database before this test
-    await setupCleanDatabase();
+  // Reset database and seed it with test data before this test
+  await setupSeededDatabase();
     
-    // Login as test user
-    await setupAuthenticatedUser(page);
+  // Login as test user
+  await setupAuthenticatedUser(page);
     
-    // Navigate to the page
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Start Swiping' }).click();
-    await expect(page.locator('#idea-carousel')).toBeVisible();
-    await page.getByRole('button').nth(1).click();
-    await page.waitForTimeout(1000);
-    await page.getByRole('button').first().click();
-    await page.waitForTimeout(1000);
-    await page.getByRole('button').nth(1).click();
-    await page.waitForTimeout(1000);
-    await page.getByRole('button').first().click();
-    await page.waitForTimeout(1000);
-    await page.getByRole('button').nth(1).click();
-    await page.waitForTimeout(1000);
-    await page.getByRole('button').first().click();
-    await page.waitForTimeout(1000);
-    await page.getByRole('button').nth(1).click();
-    await expect(page.getByRole('heading', { name: 'You\'ve seen all ideas!' })).toBeVisible();
-    await page.getByRole('link', { name: 'View Matches' }).click();
-    await expect(page.getByRole('heading', { name: 'Your Matches' }).locator('span')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Your Matches' }).locator('span')).toBeVisible();
-    await expect(page.getByText('MoodTunes')).toBeVisible();
-    await expect(page.getByText('Focus Forest')).toBeVisible();
-    await expect(page.getByText('PetMatch')).toBeVisible();
-    await page.getByRole('button', { name: 'Copy PRD Prompt' }).first().click();
-    await expect(page.getByText('PRD prompt copied!').nth(1)).toBeVisible();
+  // Navigate to the page
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Start Swiping' }).click();
+  await expect(page.locator('#idea-carousel')).toBeVisible();
+  await page.getByRole('button').nth(1).click();
+  await page.waitForTimeout(1000);
+  await page.getByRole('button').first().click();
+  await page.waitForTimeout(1000);
+  await page.getByRole('button').nth(1).click();
+  await page.waitForTimeout(1000);
+  await page.getByRole('button').first().click();
+  await page.waitForTimeout(1000);
+  await page.getByRole('button').nth(1).click();
+  await page.waitForTimeout(1000);
+  await page.getByRole('button').first().click();
+  await page.waitForTimeout(1000);
+  await page.getByRole('button').nth(1).click();
+  await expect(page.getByRole('heading', { name: 'You\'ve seen all ideas!' })).toBeVisible();
+  await page.getByRole('link', { name: 'View Matches' }).click();
+  await expect(page.getByRole('heading', { name: 'Your Matches' }).locator('span')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your Matches' }).locator('span')).toBeVisible();
+  await expect(page.getByText('MoodTunes')).toBeVisible();
+  await expect(page.getByText('Focus Forest')).toBeVisible();
+  await expect(page.getByText('PetMatch')).toBeVisible();
+  await page.getByRole('button', { name: 'Copy PRD Prompt' }).first().click();
+  await expect(page.getByText('PRD prompt copied!').nth(1)).toBeVisible();
 });
 
 --- File: tests/subscribe.spec.ts ---
@@ -15340,7 +15619,7 @@ if (NODE_ENV !== 'test' && NODE_ENV !== 'development') {
 // Initialize Convex client
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
-const TABLES_TO_RESET = ['mailing_list_subscriptions', 'visits', 'idea_swipes'] as const
+const TABLES_TO_RESET = ['mailing_list_subscriptions', 'visits', 'idea_swipes', 'ideas'] as const
 // Restrict to allowed table names for type safety
 type TableName = typeof TABLES_TO_RESET[number]
 
