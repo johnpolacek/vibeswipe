@@ -118,6 +118,14 @@ export const getAllIdeas = query({
   },
 });
 
+export const getTotalCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const ideas = await ctx.db.query("ideas").collect();
+    return ideas.length;
+  },
+});
+
 // Define the idea input type
 const ideaInput = v.object({
   name: v.string(),
@@ -168,6 +176,17 @@ export const updateIdea = mutation({
       ...update,
       updatedAt: Date.now(),
     });
+    return id;
+  },
+});
+
+export const deleteIdea = mutation({
+  args: {
+    id: v.id("ideas"),
+  },
+  handler: async (ctx, args) => {
+    const { id } = args;
+    await ctx.db.delete(id);
     return id;
   },
 }); 

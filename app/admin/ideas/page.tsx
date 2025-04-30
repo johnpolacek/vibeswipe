@@ -60,7 +60,7 @@ export default async function IdeasAdminPage() {
           {/* Ideas Table Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Current Ideas</CardTitle>
+              <CardTitle>Manage Ideas</CardTitle>
               <CardDescription>View and manage existing ideas</CardDescription>
             </CardHeader>
             <CardContent>
