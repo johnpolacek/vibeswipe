@@ -24,7 +24,7 @@ export function IdeasTable() {
       cursor: cursor ?? undefined,
       numItems: PAGE_SIZE,
     },
-  })
+  }) as { ideas: Idea[]; nextCursor: string | null } | undefined
 
   const handleImageError = (ideaId: string) => {
     setFailedImages((prev) => new Set(prev).add(ideaId))
@@ -52,7 +52,7 @@ export function IdeasTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {ideas.map((idea) => (
+            {ideas.map((idea: Idea) => (
               <TableRow key={idea._id}>
                 <TableCell>
                   <div className="relative w-16 h-16 cursor-pointer group" onClick={() => setEditingIdea({ id: idea._id, imageUrl: idea.imageUrl })}>

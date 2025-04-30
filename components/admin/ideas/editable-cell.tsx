@@ -17,14 +17,19 @@ interface EditableCellProps {
 export function EditableCell({ id, value, field, className }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(value)
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const updateIdea = useMutation(api.ideas.updateIdea)
 
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
+    if (isEditing) {
+      if (field === "description") {
+        textareaRef.current?.focus()
+      } else {
+        inputRef.current?.focus()
+      }
     }
-  }, [isEditing])
+  }, [isEditing, field])
 
   const handleSave = async () => {
     if (editValue.trim() === "") {
@@ -58,16 +63,20 @@ export function EditableCell({ id, value, field, className }: EditableCellProps)
   }
 
   if (isEditing) {
-    const Component = field === "description" ? Textarea : Input
+    if (field === "description") {
+      return (
+        <Textarea
+          ref={textareaRef}
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleSave}
+          onKeyDown={handleKeyDown}
+          className={cn("w-full focus-visible:ring-1 h-[80px] resize-none", className)}
+        />
+      )
+    }
     return (
-      <Component
-        ref={inputRef as any}
-        value={editValue}
-        onChange={(e) => setEditValue(e.target.value)}
-        onBlur={handleSave}
-        onKeyDown={handleKeyDown}
-        className={cn("w-full focus-visible:ring-1", field === "description" && "h-[80px] resize-none", className)}
-      />
+      <Input ref={inputRef} value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={handleSave} onKeyDown={handleKeyDown} className={cn("w-full focus-visible:ring-1", className)} />
     )
   }
 
