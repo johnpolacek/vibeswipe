@@ -90,9 +90,31 @@ export const getUserMatches = query({
 });
 
 export const getAllIdeas = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("ideas").collect();
+  args: {
+    paginationOpts: v.optional(
+      v.object({
+        cursor: v.optional(v.string()),
+        numItems: v.number(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const query = ctx.db.query("ideas").order("desc");
+    
+    if (args.paginationOpts) {
+      const { cursor, numItems } = args.paginationOpts;
+      const paginatedResults = await query.paginate({ cursor: cursor ?? null, numItems });
+      
+      return {
+        ideas: paginatedResults.page,
+        nextCursor: paginatedResults.continueCursor,
+      };
+    }
+
+    return {
+      ideas: await query.collect(),
+      nextCursor: null,
+    };
   },
 });
 
@@ -128,5 +150,24 @@ export const importIdeas = mutation({
     }
     
     return args.ideas.length;
+  },
+});
+
+export const updateIdea = mutation({
+  args: {
+    id: v.id("ideas"),
+    update: v.object({
+      name: v.optional(v.string()),
+      description: v.optional(v.string()),
+      imageUrl: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const { id, update } = args;
+    await ctx.db.patch(id, {
+      ...update,
+      updatedAt: Date.now(),
+    });
+    return id;
   },
 }); 
