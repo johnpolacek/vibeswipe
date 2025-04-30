@@ -87,4 +87,46 @@ export const getUserMatches = query({
       .filter((idea): idea is NonNullable<typeof idea> => idea !== null)
       .sort((a, b) => b.swipedAt - a.swipedAt);
   },
+});
+
+export const getAllIdeas = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("ideas").collect();
+  },
+});
+
+// Define the idea input type
+const ideaInput = v.object({
+  name: v.string(),
+  description: v.string(),
+  imageUrl: v.optional(v.string()),
+  srcUrl: v.optional(v.string()),
+});
+
+export const importIdeas = mutation({
+  args: {
+    ideas: v.array(
+      v.object({
+        name: v.string(),
+        description: v.string(),
+        imageUrl: v.optional(v.string()),
+        srcUrl: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    
+    // Insert each idea
+    for (const idea of args.ideas) {
+      await ctx.db.insert("ideas", {
+        ...idea,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+    
+    return args.ideas.length;
+  },
 }); 

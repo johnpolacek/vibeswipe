@@ -87,6 +87,20 @@ export default async function AdminPage() {
               </Link>
             </CardFooter>
           </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Ideas</CardTitle>
+              <CardDescription>Manage startup ideas</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">Import, view, and manage startup ideas in the database.</p>
+            </CardContent>
+            <CardFooter>
+              <Link href="/admin/ideas" className="w-full">
+                <Button className="w-full">Manage Ideas</Button>
+              </Link>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </div>

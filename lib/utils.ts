@@ -10,12 +10,11 @@ export function cn(...inputs: ClassValue[]) {
  * @param dateString ISO date string
  * @returns Formatted date string (e.g., "Jan 1, 2023")
  */
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString("en-US", {
+export function formatDate(timestamp: number) {
+  return new Date(timestamp).toLocaleDateString("en-US", {
+    year: "numeric",
     month: "short",
     day: "numeric",
-    year: "numeric",
   })
 }
 
@@ -48,18 +47,25 @@ export function seededRandom(str: string) {
 
 // Generate a random gradient based on a string id
 export function getGradient(id: string) {
+  // Hash the ID to get a consistent gradient
+  let hash = 0
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash) + id.charCodeAt(i)
+    hash = hash & hash
+  }
+
+  // Use the hash to select from predefined gradients
   const gradients = [
-    "from-pink-500 to-purple-500",
-    "from-blue-500 to-teal-500",
-    "from-green-500 to-emerald-500",
-    "from-yellow-500 to-orange-500",
-    "from-purple-500 to-indigo-500",
-    "from-red-500 to-pink-500",
-    "from-fuchsia-500 to-cyan-500",
-    "from-lime-500 to-green-700",
-    "from-amber-500 to-orange-700",
-    "from-sky-500 to-blue-700",
+    "from-blue-500 to-purple-500",
+    "from-green-500 to-blue-500",
+    "from-purple-500 to-pink-500",
+    "from-yellow-500 to-red-500",
+    "from-indigo-500 to-purple-500",
+    "from-red-500 to-orange-500",
+    "from-teal-500 to-green-500",
+    "from-pink-500 to-rose-500",
   ]
-  const rand = seededRandom(id)
-  return gradients[Math.floor(rand * gradients.length)]
+
+  const index = Math.abs(hash) % gradients.length
+  return gradients[index]
 }
