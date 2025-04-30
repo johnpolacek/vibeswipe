@@ -26,6 +26,7 @@ export function CopyPromptButtons({ idea }: CopyPromptButtonsProps) {
         description: "Ready to use in your favorite AI assistant",
       })
     } catch (error) {
+      console.error("Failed to copy", error)
       toast.error("Failed to copy", {
         description: "Please try again",
       })
