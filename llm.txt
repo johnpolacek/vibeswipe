@@ -5396,6 +5396,7 @@ export function CopyPromptButtons({ idea }: CopyPromptButtonsProps) {
         description: "Ready to use in your favorite AI assistant",
       })
     } catch (error) {
+      console.error("Failed to copy", error)
       toast.error("Failed to copy", {
         description: "Please try again",
       })
@@ -6123,7 +6124,7 @@ export function LogoLockup() {
 import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { mockIdeas } from "@/lib/data/mock-ideas"
-
+import Image from "next/image"
 export function HeroIdeaPreview() {
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -6156,7 +6157,13 @@ export function HeroIdeaPreview() {
             scale: index === currentIndex ? 1 : 1.1,
           }}
         >
-          <img src={idea.imageUrl} alt={idea.title} className="object-cover w-full h-full absolute inset-0" />
+          {idea.imageUrl ? (
+            <Image src={idea.imageUrl} alt={idea.title} className="object-cover w-full h-full absolute inset-0" />
+          ) : (
+            <div className="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
+              <p className="text-white text-center">No image available</p>
+            </div>
+          )}
           <div className="absolute bottom-0 left-0 z-10 w-full h-full bg-gradient-to-t from-black via-transparent to-transparent" />
           <div className="absolute bottom-0 left-0 z-10 w-full h-full bg-gradient-to-b from-background/30 via-transparent to-transparent" />
           <div className="absolute bottom-0 left-0 w-full pt-6 pb-8 z-10 px-2 flex flex-col items-center">
