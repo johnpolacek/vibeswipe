@@ -1,8 +1,9 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
+import { seedIdeas } from "./seed"
 
 // Define allowed table names for type safety
-const ALLOWED_TABLES = ["visits", "mailing_list_subscriptions", "idea_swipes"] as const
+const ALLOWED_TABLES = ["visits", "mailing_list_subscriptions", "idea_swipes", "ideas"] as const
 type TableName = typeof ALLOWED_TABLES[number]
 
 function isTestOrDevEnv() {
@@ -17,7 +18,8 @@ export const deleteAll = mutation({
   args: { tableName: v.union(
     v.literal("visits"),
     v.literal("mailing_list_subscriptions"),
-    v.literal("idea_swipes")
+    v.literal("idea_swipes"),
+    v.literal("ideas")
   ) },
   handler: async (ctx, args) => {
     if (!isTestOrDevEnv()) {
@@ -39,7 +41,8 @@ export const countDocuments = query({
   args: { tableName: v.union(
     v.literal("visits"),
     v.literal("mailing_list_subscriptions"),
-    v.literal("idea_swipes")
+    v.literal("idea_swipes"),
+    v.literal("ideas")
   ) },
   handler: async (ctx, args) => {
     if (!isTestOrDevEnv()) {
@@ -60,6 +63,22 @@ export const seedTestData = mutation({
     if (!isTestOrDevEnv()) {
       throw new Error("This operation is only allowed in test or development environments");
     }
+    
+    // Seed all ideas
+    await ctx.db.query("ideas").collect().then(async (ideas) => {
+      if (ideas.length === 0) {
+        const now = Date.now();
+        // Insert all ideas with timestamps
+        for (const idea of seedIdeas) {
+          await ctx.db.insert("ideas", {
+            ...idea,
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+      }
+    });
+
     // Seed visits
     await ctx.db.insert("visits", {
       path: "/test-path",
@@ -68,6 +87,7 @@ export const seedTestData = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+    
     // Seed mailing list subscriptions
     await ctx.db.insert("mailing_list_subscriptions", {
       userId: "test-user",
@@ -79,6 +99,7 @@ export const seedTestData = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+    
     return { success: true };
   },
 }); 

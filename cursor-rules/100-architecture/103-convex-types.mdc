@@ -1,0 +1,173 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Convex Type System Usage
+
+## Description
+This rule documents the standard patterns for using Convex's type system in our application, including how to properly use generated types and schema validation.
+
+## Type Generation
+
+### Using Generated Types
+Always use Convex's generated types from `@/convex/_generated/dataModel` instead of creating manual interfaces. For example:
+
+```typescript
+// ✅ Good: Using generated types
+import { Doc } from "@/convex/_generated/dataModel"
+
+// Get full document type including system fields
+type Idea = Doc<"ideas">
+
+// Get just the ID type
+type IdeaId = Id<"ideas">
+
+// Get input type (excluding system fields)
+type IdeaInput = Omit<Doc<"ideas">, "_id" | "_creationTime" | "createdAt" | "updatedAt">
+```
+
+```typescript
+// ❌ Bad: Manual interface creation
+interface Idea {
+  _id: string
+  name: string
+  description: string
+  // ... etc
+}
+```
+
+### Type Inference in Components
+When working with Convex data in components, use the generated types:
+
+```typescript
+import { Doc } from "@/convex/_generated/dataModel"
+
+function IdeaList({ ideas }: { ideas: Doc<"ideas">[] }) {
+  // ...
+}
+```
+
+## Schema and Validation
+
+### Schema Definition
+Define your schema in `convex/schema.ts` using Convex's schema definition functions:
+
+```typescript
+import { defineSchema, defineTable } from "convex/server"
+import { v } from "convex/values"
+
+export default defineSchema({
+  ideas: defineTable({
+    name: v.string(),
+    description: v.string(),
+    imageUrl: v.optional(v.string()),
+    srcUrl: v.optional(v.string()),
+  })
+})
+```
+
+### Mutation Arguments
+For mutations that accept document data, use the same validator structure as your schema:
+
+```typescript
+// ✅ Good: Validator matches schema
+export const create = mutation({
+  args: {
+    name: v.string(),
+    description: v.string(),
+    imageUrl: v.optional(v.string()),
+    srcUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // ...
+  }
+})
+```
+
+```typescript
+// ❌ Bad: Separate validator definition
+const ideaValidator = v.object({...})
+
+export const create = mutation({
+  args: { idea: ideaValidator },
+  handler: async (ctx, args) => {
+    // ...
+  }
+})
+```
+
+## Best Practices
+
+1. **Use Generated Types**
+   - Always import types from `@/convex/_generated/dataModel`
+   - Use `Doc<"tableName">` for full document types
+   - Use `Id<"tableName">` for ID types
+   - Use `Omit` to create input types that exclude system fields
+
+2. **Schema as Source of Truth**
+   - Define all data structures in `convex/schema.ts`
+   - Let Convex generate the TypeScript types
+   - Don't create separate type definitions
+
+3. **Validation**
+   - Use schema-based validation in Convex mutations
+   - Keep validation consistent with schema
+   - Perform basic client-side validation for UX
+   - Trust server-side validation for data integrity
+
+4. **System Fields**
+   - Remember that all documents include `_id` and `_creationTime`
+   - Use proper types when working with system fields
+   - Exclude system fields when creating new documents
+
+## Examples
+
+### Component with Generated Types
+```typescript
+import { Doc } from "@/convex/_generated/dataModel"
+
+export function IdeaCard({ idea }: { idea: Doc<"ideas"> }) {
+  return (
+    <div>
+      <h2>{idea.name}</h2>
+      <p>{idea.description}</p>
+      {idea.imageUrl && <img src={idea.imageUrl} alt={idea.name} />}
+    </div>
+  )
+}
+```
+
+### Mutation with Schema-based Validation
+```typescript
+import { mutation } from "./_generated/server"
+import { v } from "convex/values"
+
+export const create = mutation({
+  args: {
+    name: v.string(),
+    description: v.string(),
+    imageUrl: v.optional(v.string()),
+    srcUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const id = await ctx.db.insert("ideas", {
+      ...args,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    })
+    return id
+  },
+})
+```
+
+### Form Component with Input Types
+```typescript
+import { Doc } from "@/convex/_generated/dataModel"
+
+type IdeaInput = Omit<Doc<"ideas">, "_id" | "_creationTime" | "createdAt" | "updatedAt">
+
+export function IdeaForm({ onSubmit }: { onSubmit: (idea: IdeaInput) => void }) {
+  // Form implementation
+}
+```

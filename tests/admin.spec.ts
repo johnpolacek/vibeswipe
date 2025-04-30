@@ -19,6 +19,23 @@ test('should load the admin dashboard', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Admin Dashboard' })).toBeVisible();
 });
 
+test('can upload ideas', async ({ page }) => {
+  // Reset database before this test
+    await setupCleanDatabase();
+    
+    // Login as test user
+    await setupAuthenticatedUser(page);
+
+    // Navigate to the page
+    await page.goto('/admin/ideas');
+    await expect(page.getByRole('heading', { name: 'Manage Ideas' })).toBeVisible();
+    await page.setInputFiles('input[type="file"]', 'tests/fixtures/productivity_ideas.json');
+    await page.getByRole('button', { name: 'Import' }).click();
+    await expect(page.getByText('Successfully imported 20 ideas')).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'FocusFlow' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'A distraction blocker that' })).toBeVisible();
+});
+
 test('can view analytics', async ({ page }) => {
   // Reset database before this test
     await setupCleanDatabase();
