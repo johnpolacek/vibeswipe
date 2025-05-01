@@ -3,7 +3,7 @@ export const siteConfig = {
   description: "Swipe through project ideas, vibe the ones you love",
   shortDescription: "Swipe through project ideas, vibe the ones you love",
   url: "vibeswipe.vercel.app",
-  shareImage: "",
+  shareImage: "screenshot.png",
   x: "johnpolacek",
   github: "https://github.com/johnpolacek/vibeswipe",
   logo: ""
