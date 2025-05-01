@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { navItems } from "@/lib/config/navigation"
 import { GalleryHorizontalEnd } from "lucide-react"
-import { useUser } from "@clerk/nextjs"
 
 interface MainNavProps {
   isAdmin: boolean
@@ -13,7 +12,6 @@ interface MainNavProps {
 
 export function MainNav({ isAdmin }: MainNavProps) {
   const pathname = usePathname()
-  const { isSignedIn } = useUser()
 
   return (
     <nav className="hidden md:flex md:gap-6 items-center">

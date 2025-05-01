@@ -22,7 +22,7 @@ export default function PrivacyPage() {
             <p className="mb-4">We may collect the following types of information:</p>
             <ul className="list-disc pl-6">
               <li className="mb-2">Account Information: Email address, username, and authentication data when you create an account</li>
-              <li className="mb-2">Usage Data: Your interactions with project ideas, including swipes, likes ("vibes"), and matches</li>
+              <li className="mb-2">Usage Data: Your interactions with project ideas, including swipes, likes (“vibes”), and matches</li>
               <li className="mb-2">Device Information: IP address, browser type, device type, operating system, and other technical identifiers</li>
               <li className="mb-2">User Content: Any project ideas, comments, or other content you submit to the platform</li>
               <li className="mb-2">Communication Data: Information from your interactions with our support channels</li>
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
 
           <div className="mt-8 p-4 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-500">
-              DISCLAIMER: THIS PRIVACY POLICY IS PROVIDED "AS IS" WITHOUT ANY WARRANTIES, EXPRESS OR IMPLIED. VIBESWIPE RESERVES THE RIGHT TO COLLECT, USE, AND SHARE YOUR INFORMATION IN ANY MANNER
+              DISCLAIMER: THIS PRIVACY POLICY IS PROVIDED “AS IS” WITHOUT ANY WARRANTIES, EXPRESS OR IMPLIED. VIBESWIPE RESERVES THE RIGHT TO COLLECT, USE, AND SHARE YOUR INFORMATION IN ANY MANNER
               CONSISTENT WITH THIS POLICY OR AS REQUIRED BY LAW, WITHOUT LIABILITY TO YOU OR ANY THIRD PARTY.
             </p>
           </div>
