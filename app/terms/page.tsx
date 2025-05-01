@@ -19,8 +19,8 @@ export default function TermsPage() {
 
           <h2 className="text-xl font-semibold mb-4">2. Description of Service</h2>
           <p className="mb-6">
-            VibeSwipe is a platform that allows users to discover and interact with project ideas through a swiping interface. Users can browse, like ("vibe"), and save project ideas for future
-            reference. THE SERVICE IS PROVIDED STRICTLY "AS IS" AND "AS AVAILABLE" WITHOUT ANY WARRANTIES OR GUARANTEES OF ANY KIND.
+            VibeSwipe is a platform that allows users to discover and interact with project ideas through a swiping interface. Users can browse and save project ideas for future reference. THE SERVICE
+            IS PROVIDED STRICTLY “AS IS” AND “AS AVAILABLE” WITHOUT ANY WARRANTIES OR GUARANTEES OF ANY KIND.
           </p>
 
           <h2 className="text-xl font-semibold mb-4">3. User Accounts</h2>
@@ -38,7 +38,7 @@ export default function TermsPage() {
 
           <h2 className="text-xl font-semibold mb-4">5. Intellectual Property</h2>
           <p className="mb-6">
-            Project ideas submitted to VibeSwipe remain the intellectual property of their respective creators. Users are prohibited from copying, implementing, or commercializing other users' ideas
+            Project ideas submitted to VibeSwipe remain the intellectual property of their respective creators. Users are prohibited from copying, implementing, or commercializing other users’ ideas
             without explicit permission from the idea creator. VIBESWIPE ASSUMES NO RESPONSIBILITY FOR AND MAKES NO WARRANTIES REGARDING THE ORIGINALITY, OWNERSHIP, SAFETY, OR COMMERCIAL VIABILITY OF
             ANY IDEAS SHARED ON THE PLATFORM.
           </p>
@@ -77,7 +77,7 @@ export default function TermsPage() {
           <p className="mb-6">
             TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
             <ul className="list-disc pl-6 mt-2">
-              <li>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE</li>
+              <li>THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE” WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE</li>
               <li>
                 VIBESWIPE EXPRESSLY DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, AND THOSE ARISING
                 FROM COURSE OF DEALING OR USAGE OF TRADE
@@ -87,14 +87,14 @@ export default function TermsPage() {
                 VIBESWIPE SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES FOR LOSS OF PROFITS, GOODWILL,
                 USE, DATA, OR OTHER INTANGIBLE LOSSES
               </li>
-              <li>IN NO EVENT SHALL VIBESWIPE'S TOTAL LIABILITY TO YOU FOR ALL CLAIMS EXCEED THE AMOUNT PAID BY YOU, IF ANY, FOR ACCESSING THE SERVICE</li>
+              <li>IN NO EVENT SHALL VIBESWIPE’S TOTAL LIABILITY TO YOU FOR ALL CLAIMS EXCEED THE AMOUNT PAID BY YOU, IF ANY, FOR ACCESSING THE SERVICE</li>
             </ul>
           </p>
 
           <h2 className="text-xl font-semibold mb-4">10. Indemnification</h2>
           <p className="mb-6">
             YOU AGREE TO DEFEND, INDEMNIFY, AND HOLD HARMLESS VIBESWIPE AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AND AGENTS FROM AND AGAINST ANY AND ALL CLAIMS, DAMAGES, OBLIGATIONS, LOSSES,
-            LIABILITIES, COSTS, AND EXPENSES (INCLUDING BUT NOT LIMITED TO ATTORNEY'S FEES) ARISING FROM: (A) YOUR USE OF THE SERVICE; (B) YOUR VIOLATION OF THESE TERMS; (C) YOUR VIOLATION OF ANY
+            LIABILITIES, COSTS, AND EXPENSES (INCLUDING BUT NOT LIMITED TO ATTORNEY’S FEES) ARISING FROM: (A) YOUR USE OF THE SERVICE; (B) YOUR VIOLATION OF THESE TERMS; (C) YOUR VIOLATION OF ANY
             THIRD PARTY RIGHT, INCLUDING WITHOUT LIMITATION ANY COPYRIGHT, PROPERTY, OR PRIVACY RIGHT.
           </p>
 

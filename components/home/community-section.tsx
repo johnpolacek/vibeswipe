@@ -1,7 +1,5 @@
 import { FaDiscord, FaReddit } from "react-icons/fa"
 import { Heading } from "../typography/heading"
-import Link from "next/link"
-import { Mail } from "lucide-react"
 
 export function CommunitySection() {
   return (
