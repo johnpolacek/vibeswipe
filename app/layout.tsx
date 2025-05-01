@@ -86,10 +86,10 @@ export default async function RootLayout({
                   <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left text-sm">
                     <p>© {currentYear} VibeSwipe. All rights reserved.</p>
                     <nav className="flex gap-4">
-                      <Link href="#" className="hover:underline underline-offset-4">
+                      <Link href="/terms" className="hover:underline underline-offset-4">
                         Terms
                       </Link>
-                      <Link href="#" className="hover:underline underline-offset-4">
+                      <Link href="/privacy" className="hover:underline underline-offset-4">
                         Privacy
                       </Link>
                       <Link href="https://discord.gg/PSSBsqCB2K" className="hover:underline">
