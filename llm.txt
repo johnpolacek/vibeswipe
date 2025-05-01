@@ -78,77 +78,9 @@ supabase/.temp/*
 Find Your Next Vibe
 Swipe through project ideas, vibe the ones you love.
 
-## TODO
+## A Vibecode Party Starter Project
 
-Generate lots of ideas
-
-*Categories*
-
-Productivity Tools, 
-Health & Wellness, 
-Education & Learning, 
-Social Impact, 
-Entertainment,
-Gaming, 
-Finances, 
-Environmental,
-Sustainability, 
-Creative Tools, 
-Smart Home, 
-Travel,
-Adventure, 
-Food & Cooking, 
-Fitness,
-Sports, 
-Music,
-Audio, 
-Developer Tools, 
-Community,
-Social Media, 
-Personal Growth, 
-Pet Care, 
-Remote Work, 
-Data Visualization,
-Data Analytics,
-Language Exchange,
-Cultures, 
-Mental Health,
-Mindfulness, 
-Urban Gardening, 
-Digital Art, 
-Indie Game, 
-Knowledge Management, 
-Habit Tracking & Behavior Change, 
-Voice Technology, 
-Sleeping & Dreams, 
-Genealogy & Family History, 
-Weather, 
-Climate Data, 
-Handcrafters & Makers, 
-Biometric Data, 
-Local Food Supply Chain,
-Photography, 
-Craft Beer, 
-Board Game Design, 
-Plant Care, 
-Books, 
-Comic Book, 
-RPG Campaign Management,
-Memes,
-Jokes,
-Party Games,
-Absurd Situation Simulator,
-Simulator, 
-Karaoke & Lip Sync Battles, 
-Dance Moves, 
-Weird Facts & Trivia, 
-Emojis, 
-WebGL & 3D Graphics, 
-Text-to-Speech & Voice Synthesis, 
-Generative Art & Creative Coding, 
-WebRTC & Real-time Communication, 
-Augmented Reality Filters, 
-Procedural Music Generation,
+Built with the [Vibecode Party Starter](https://starter.vibecode.party)
 
 --- File: app/_actions/ban-user.ts ---
 
@@ -4156,7 +4088,7 @@ export default function PrivacyPage() {
         <div className="prose prose-gray max-w-none">
           <h2 className="text-xl font-semibold mb-4">1. Introduction</h2>
           <p className="mb-6">
-            This Privacy Policy describes how VibeSwipe ("we," "our," or "us") collects, uses, and shares your information when you use our service. BY USING VIBESWIPE, YOU ACCEPT AND AGREE TO THIS
+            This Privacy Policy describes how VibeSwipe (“we,” “our,” or “us”) collects, uses, and shares your information when you use our service. BY USING VIBESWIPE, YOU ACCEPT AND AGREE TO THIS
             PRIVACY POLICY IN ITS ENTIRETY. IF YOU DO NOT AGREE TO THIS PRIVACY POLICY, DO NOT USE THE SERVICE.
           </p>
 
@@ -4219,7 +4151,7 @@ export default function PrivacyPage() {
             OF YOUR INFORMATION. You transmit any information to us at your own risk.
           </p>
 
-          <h2 className="text-xl font-semibold mb-4">8. Children's Privacy</h2>
+          <h2 className="text-xl font-semibold mb-4">8. Children’s Privacy</h2>
           <p className="mb-6">
             The Service is not intended for use by children under the age of 13. We do not knowingly collect information from children under 13. If you become aware that a child has provided us with
             personal information, please contact us.
@@ -4387,8 +4319,8 @@ export default function TermsPage() {
 
           <h2 className="text-xl font-semibold mb-4">2. Description of Service</h2>
           <p className="mb-6">
-            VibeSwipe is a platform that allows users to discover and interact with project ideas through a swiping interface. Users can browse, like ("vibe"), and save project ideas for future
-            reference. THE SERVICE IS PROVIDED STRICTLY "AS IS" AND "AS AVAILABLE" WITHOUT ANY WARRANTIES OR GUARANTEES OF ANY KIND.
+            VibeSwipe is a platform that allows users to discover and interact with project ideas through a swiping interface. Users can browse and save project ideas for future reference. THE SERVICE
+            IS PROVIDED STRICTLY “AS IS” AND “AS AVAILABLE” WITHOUT ANY WARRANTIES OR GUARANTEES OF ANY KIND.
           </p>
 
           <h2 className="text-xl font-semibold mb-4">3. User Accounts</h2>
@@ -4406,7 +4338,7 @@ export default function TermsPage() {
 
           <h2 className="text-xl font-semibold mb-4">5. Intellectual Property</h2>
           <p className="mb-6">
-            Project ideas submitted to VibeSwipe remain the intellectual property of their respective creators. Users are prohibited from copying, implementing, or commercializing other users' ideas
+            Project ideas submitted to VibeSwipe remain the intellectual property of their respective creators. Users are prohibited from copying, implementing, or commercializing other users’ ideas
             without explicit permission from the idea creator. VIBESWIPE ASSUMES NO RESPONSIBILITY FOR AND MAKES NO WARRANTIES REGARDING THE ORIGINALITY, OWNERSHIP, SAFETY, OR COMMERCIAL VIABILITY OF
             ANY IDEAS SHARED ON THE PLATFORM.
           </p>
@@ -4445,7 +4377,7 @@ export default function TermsPage() {
           <p className="mb-6">
             TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
             <ul className="list-disc pl-6 mt-2">
-              <li>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE</li>
+              <li>THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE” WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE</li>
               <li>
                 VIBESWIPE EXPRESSLY DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, AND THOSE ARISING
                 FROM COURSE OF DEALING OR USAGE OF TRADE
@@ -4455,14 +4387,14 @@ export default function TermsPage() {
                 VIBESWIPE SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES FOR LOSS OF PROFITS, GOODWILL,
                 USE, DATA, OR OTHER INTANGIBLE LOSSES
               </li>
-              <li>IN NO EVENT SHALL VIBESWIPE'S TOTAL LIABILITY TO YOU FOR ALL CLAIMS EXCEED THE AMOUNT PAID BY YOU, IF ANY, FOR ACCESSING THE SERVICE</li>
+              <li>IN NO EVENT SHALL VIBESWIPE’S TOTAL LIABILITY TO YOU FOR ALL CLAIMS EXCEED THE AMOUNT PAID BY YOU, IF ANY, FOR ACCESSING THE SERVICE</li>
             </ul>
           </p>
 
           <h2 className="text-xl font-semibold mb-4">10. Indemnification</h2>
           <p className="mb-6">
             YOU AGREE TO DEFEND, INDEMNIFY, AND HOLD HARMLESS VIBESWIPE AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AND AGENTS FROM AND AGAINST ANY AND ALL CLAIMS, DAMAGES, OBLIGATIONS, LOSSES,
-            LIABILITIES, COSTS, AND EXPENSES (INCLUDING BUT NOT LIMITED TO ATTORNEY'S FEES) ARISING FROM: (A) YOUR USE OF THE SERVICE; (B) YOUR VIOLATION OF THESE TERMS; (C) YOUR VIOLATION OF ANY
+            LIABILITIES, COSTS, AND EXPENSES (INCLUDING BUT NOT LIMITED TO ATTORNEY’S FEES) ARISING FROM: (A) YOUR USE OF THE SERVICE; (B) YOUR VIOLATION OF THESE TERMS; (C) YOUR VIOLATION OF ANY
             THIRD PARTY RIGHT, INCLUDING WITHOUT LIMITATION ANY COPYRIGHT, PROPERTY, OR PRIVACY RIGHT.
           </p>
 
@@ -6678,12 +6610,12 @@ export function HeroSection() {
       {/* End ultra-dense ocean wavy lines SVG background */}
       <div className="container px-4 md:px-6 relative z-10">
         <div className="grid gap-6 lg:grid-cols-2 items-center max-w-6xl mx-auto">
-          <div className="space-y-4">
-            <h1 className="text-3xl font-medium tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
+          <div className="space-y-4 pb-4 sm:pb-0">
+            <h1 className="text-3xl text-center sm:text-left font-medium tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
               Find Your Next <span className="text-primary font-extrabold tracking-wide">Vibe</span>
             </h1>
-            <p className="max-w-[600px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Swipe through project ideas, vibe the ones you love.</p>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+            <p className="max-w-[600px] text-center sm:text-left md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed text-balance">Swipe through project ideas, vibe the ones you love.</p>
+            <div className="flex flex-wrap gap-2 w-full justify-center">
               <Link href="/explore">
                 <Button size="lg">Start Swiping</Button>
               </Link>
@@ -6724,12 +6656,10 @@ export function HeroSection() {
 
 import { FaDiscord, FaReddit } from "react-icons/fa"
 import { Heading } from "../typography/heading"
-import Link from "next/link"
-import { Mail } from "lucide-react"
 
 export function CommunitySection() {
   return (
-    <section className="container flex items-center justify-center flex-col gap-4 py-16">
+    <section className="container flex items-center justify-center flex-col gap-4 py-8 sm:py-16">
       <Heading variant="h3">Vibecoding Community</Heading>
       <p className="text-gray-700 mb-4">At vibecode.party, we’re all about coders, creators, and AI enthusiasts building cool stuff together and learning from each other.</p>
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12">
@@ -8788,12 +8718,6 @@ export function MainNav({ isAdmin }: MainNavProps) {
           {item.title}
         </Link>
       ))}
-
-      {isSignedIn && (
-        <Link href="/matches" className={cn("text-sm mt-1 font-medium transition-colors hover:text-primary", pathname === "/matches" ? "text-primary" : "text-muted-foreground")}>
-          Matches
-        </Link>
-      )}
 
       {isAdmin && (
         <Link href="/admin" className={cn("text-sm mt-1 font-medium transition-colors hover:text-primary", pathname?.startsWith("/admin") ? "text-primary" : "text-muted-foreground")}>
@@ -11426,12 +11350,37 @@ export async function MatchesView() {
   if (!userId) {
     return (
       <div className="container max-w-4xl px-4 py-12 md:px-6 md:py-24">
-        <Card className="p-6 text-center">
-          <p className="text-gray-500 mb-4">Sign in to see your matches</p>
-          <SignInButton mode="modal">
-            <Button className="bg-primary hover:bg-primary/90">Sign in</Button>
-          </SignInButton>
-        </Card>
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl mb-4">
+            Your <span className="text-primary">Matches</span>
+          </h1>
+          <p className="max-w-[600px] text-balance mx-auto text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Sign in to see your matched ideas and start exploring.</p>
+        </div>
+        <div className="mx-auto max-w-3xl">
+          <Card>
+            <CardContent className="flex flex-col items-center gap-6 py-10">
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl font-semibold">Sign in to see your matches</h2>
+                <p className="text-muted-foreground">Create an account to swipe, save, and unlock the full experience.</p>
+              </div>
+              <SignInButton mode="modal">
+                <Button size="lg" className="w-full max-w-xs">
+                  Sign up / Sign in
+                </Button>
+              </SignInButton>
+              <div className="flex items-center w-full max-w-xs gap-2">
+                <div className="flex-1 h-px bg-muted" />
+                <span className="text-muted-foreground text-xs">or</span>
+                <div className="flex-1 h-px bg-muted" />
+              </div>
+              <Link href="/explore">
+                <Button size="lg" variant="outline" className="w-full max-w-xs">
+                  Explore Ideas
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
@@ -18205,8 +18154,8 @@ export const navItems = [
     href: "/explore",
   },
   {
-    title: "Trending",
-    href: "/trending",
+    title: "Matches",
+    href: "/matches",
   },
 ] as const
 
