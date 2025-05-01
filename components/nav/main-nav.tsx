@@ -31,12 +31,6 @@ export function MainNav({ isAdmin }: MainNavProps) {
         </Link>
       ))}
 
-      {isSignedIn && (
-        <Link href="/matches" className={cn("text-sm mt-1 font-medium transition-colors hover:text-primary", pathname === "/matches" ? "text-primary" : "text-muted-foreground")}>
-          Matches
-        </Link>
-      )}
-
       {isAdmin && (
         <Link href="/admin" className={cn("text-sm mt-1 font-medium transition-colors hover:text-primary", pathname?.startsWith("/admin") ? "text-primary" : "text-muted-foreground")}>
           Admin

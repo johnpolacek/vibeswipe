@@ -4,8 +4,8 @@ export const navItems = [
     href: "/explore",
   },
   {
-    title: "Trending",
-    href: "/trending",
+    title: "Matches",
+    href: "/matches",
   },
 ] as const
 
