@@ -3978,7 +3978,7 @@ import { HomeView } from "@/components/views/home-view"
 
 export default async function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col bg-green-100/10">
+    <div className="flex min-h-screen flex-col">
       <HomeView />
     </div>
   )
@@ -4121,7 +4121,7 @@ export default function PrivacyPage() {
             <p className="mb-4">We may collect the following types of information:</p>
             <ul className="list-disc pl-6">
               <li className="mb-2">Account Information: Email address, username, and authentication data when you create an account</li>
-              <li className="mb-2">Usage Data: Your interactions with project ideas, including swipes, likes ("vibes"), and matches</li>
+              <li className="mb-2">Usage Data: Your interactions with project ideas, including swipes, likes (“vibes”), and matches</li>
               <li className="mb-2">Device Information: IP address, browser type, device type, operating system, and other technical identifiers</li>
               <li className="mb-2">User Content: Any project ideas, comments, or other content you submit to the platform</li>
               <li className="mb-2">Communication Data: Information from your interactions with our support channels</li>
@@ -4200,7 +4200,7 @@ export default function PrivacyPage() {
 
           <div className="mt-8 p-4 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-500">
-              DISCLAIMER: THIS PRIVACY POLICY IS PROVIDED "AS IS" WITHOUT ANY WARRANTIES, EXPRESS OR IMPLIED. VIBESWIPE RESERVES THE RIGHT TO COLLECT, USE, AND SHARE YOUR INFORMATION IN ANY MANNER
+              DISCLAIMER: THIS PRIVACY POLICY IS PROVIDED “AS IS” WITHOUT ANY WARRANTIES, EXPRESS OR IMPLIED. VIBESWIPE RESERVES THE RIGHT TO COLLECT, USE, AND SHARE YOUR INFORMATION IN ANY MANNER
               CONSISTENT WITH THIS POLICY OR AS REQUIRED BY LAW, WITHOUT LIABILITY TO YOU OR ANY THIRD PARTY.
             </p>
           </div>
@@ -6685,7 +6685,7 @@ export function CommunitySection() {
   return (
     <section className="container flex items-center justify-center flex-col gap-4 py-8 sm:py-16">
       <Heading variant="h3">Vibecoding Community</Heading>
-      <p className="text-gray-700 mb-4">At vibecode.party, we’re all about coders, creators, and AI enthusiasts building cool stuff together and learning from each other.</p>
+      <p className="mb-4">At vibecode.party, we’re all about coders, creators, and AI enthusiasts building cool stuff together and learning from each other.</p>
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12">
         <a
           href="https://discord.gg/vibecode"
@@ -8717,7 +8717,6 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { navItems } from "@/lib/config/navigation"
 import { GalleryHorizontalEnd } from "lucide-react"
-import { useUser } from "@clerk/nextjs"
 
 interface MainNavProps {
   isAdmin: boolean
@@ -8725,7 +8724,6 @@ interface MainNavProps {
 
 export function MainNav({ isAdmin }: MainNavProps) {
   const pathname = usePathname()
-  const { isSignedIn } = useUser()
 
   return (
     <nav className="hidden md:flex md:gap-6 items-center">
@@ -18191,8 +18189,8 @@ export const siteConfig = {
   title: "VibeSwipe",
   description: "Swipe through project ideas, vibe the ones you love",
   shortDescription: "Swipe through project ideas, vibe the ones you love",
-  url: "vibeswipe.vercel.app",
-  shareImage: "",
+  url: "https://ideas.vibecode.party",
+  shareImage: "https://ideas.vibecode.party/screenshot.png",
   x: "johnpolacek",
   github: "https://github.com/johnpolacek/vibeswipe",
   logo: ""
