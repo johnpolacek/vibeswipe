@@ -37,7 +37,7 @@ export function HeroIdeaPreview() {
           }}
         >
           {idea.imageUrl ? (
-            <Image src={idea.imageUrl} alt={idea.title} className="object-cover w-full h-full absolute inset-0" />
+            <Image src={idea.imageUrl} alt={idea.title} fill className="object-cover w-full h-full absolute inset-0" />
           ) : (
             <div className="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
               <p className="text-white text-center">No image available</p>

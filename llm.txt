@@ -3897,7 +3897,7 @@ export default async function RootLayout({
                       <Link href="#" className="hover:underline underline-offset-4">
                         Privacy
                       </Link>
-                      <Link href="#" className="hover:underline underline-offset-4">
+                      <Link href="https://discord.gg/PSSBsqCB2K" className="hover:underline">
                         Contact
                       </Link>
                     </nav>
@@ -6458,7 +6458,7 @@ export function HeroIdeaPreview() {
           }}
         >
           {idea.imageUrl ? (
-            <Image src={idea.imageUrl} alt={idea.title} className="object-cover w-full h-full absolute inset-0" />
+            <Image src={idea.imageUrl} alt={idea.title} fill className="object-cover w-full h-full absolute inset-0" />
           ) : (
             <div className="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
               <p className="text-white text-center">No image available</p>
@@ -11176,13 +11176,11 @@ export function ExploreView() {
 --- File: components/views/home-view.tsx ---
 
 import { HeroSection } from "@/components/hero-section"
-import { TrendingIdeasSection } from "@/components/trending-ideas-section"
 
 export function HomeView() {
   return (
     <>
       <HeroSection />
-      <TrendingIdeasSection />
     </>
   )
 }

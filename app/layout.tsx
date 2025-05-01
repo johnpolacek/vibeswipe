@@ -92,7 +92,7 @@ export default async function RootLayout({
                       <Link href="#" className="hover:underline underline-offset-4">
                         Privacy
                       </Link>
-                      <Link href="#" className="hover:underline underline-offset-4">
+                      <Link href="https://discord.gg/PSSBsqCB2K" className="hover:underline">
                         Contact
                       </Link>
                     </nav>

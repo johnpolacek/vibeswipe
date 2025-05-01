@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "convex/react"
+import { useQuery, useMutation } from "convex/react"
 import { api } from "@/lib/convex"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Doc, Id } from "@/convex/_generated/dataModel"
@@ -8,14 +8,16 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import Image from "next/image"
 import { EditImageModal } from "./edit-image-modal"
-import { ImageIcon } from "lucide-react"
+import { ImageIcon, Trash2Icon } from "lucide-react"
 import { EditableCell } from "./editable-cell"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type Idea = Doc<"ideas">
 
 export function IdeasTable() {
   const [cursor, setCursor] = useState<string | null>(null)
   const [editingIdea, setEditingIdea] = useState<{ id: string; imageUrl?: string } | null>(null)
+  const [deletingIdea, setDeletingIdea] = useState<Idea | null>(null)
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
   const PAGE_SIZE = 20
 
@@ -27,9 +29,16 @@ export function IdeasTable() {
   }) as { ideas: Idea[]; nextCursor: string | null } | undefined
 
   const totalCount = useQuery(api.ideas.getTotalCount)
+  const deleteIdea = useMutation(api.ideas.deleteIdea)
 
   const handleImageError = (ideaId: string) => {
     setFailedImages((prev) => new Set(prev).add(ideaId))
+  }
+
+  const handleDelete = async () => {
+    if (!deletingIdea) return
+    await deleteIdea({ id: deletingIdea._id })
+    setDeletingIdea(null)
   }
 
   if (!paginatedIdeas) {
@@ -54,6 +63,7 @@ export function IdeasTable() {
               <TableHead>Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -80,6 +90,12 @@ export function IdeasTable() {
                 </TableCell>
                 <TableCell>
                   <EditableCell id={idea._id} value={idea.description} field="description" className="w-full truncate" />
+                </TableCell>
+                <TableCell>
+                  <Button variant="ghost" size="icon" onClick={() => setDeletingIdea(idea)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                    <Trash2Icon className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -114,6 +130,21 @@ export function IdeasTable() {
           }}
         />
       )}
+
+      <AlertDialog open={!!deletingIdea} onOpenChange={(open) => !open && setDeletingIdea(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently delete the idea "{deletingIdea?.name}". This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

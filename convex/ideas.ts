@@ -178,4 +178,15 @@ export const updateIdea = mutation({
     });
     return id;
   },
+});
+
+export const deleteIdea = mutation({
+  args: {
+    id: v.id("ideas"),
+  },
+  handler: async (ctx, args) => {
+    const { id } = args;
+    await ctx.db.delete(id);
+    return id;
+  },
 }); 
