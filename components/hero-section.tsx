@@ -24,12 +24,12 @@ export function HeroSection() {
       {/* End ultra-dense ocean wavy lines SVG background */}
       <div className="container px-4 md:px-6 relative z-10">
         <div className="grid gap-6 lg:grid-cols-2 items-center max-w-6xl mx-auto">
-          <div className="space-y-4">
-            <h1 className="text-3xl font-medium tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
+          <div className="space-y-4 pb-4 sm:pb-0">
+            <h1 className="text-3xl text-center sm:text-left font-medium tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
               Find Your Next <span className="text-primary font-extrabold tracking-wide">Vibe</span>
             </h1>
-            <p className="max-w-[600px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">Swipe through project ideas, vibe the ones you love.</p>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+            <p className="max-w-[600px] text-center sm:text-left md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed text-balance">Swipe through project ideas, vibe the ones you love.</p>
+            <div className="flex flex-wrap gap-2 w-full justify-center">
               <Link href="/explore">
                 <Button size="lg">Start Swiping</Button>
               </Link>
