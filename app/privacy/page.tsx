@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <div className="prose prose-gray max-w-none">
           <h2 className="text-xl font-semibold mb-4">1. Introduction</h2>
           <p className="mb-6">
-            This Privacy Policy describes how VibeSwipe ("we," "our," or "us") collects, uses, and shares your information when you use our service. BY USING VIBESWIPE, YOU ACCEPT AND AGREE TO THIS
+            This Privacy Policy describes how VibeSwipe (“we,” “our,” or “us”) collects, uses, and shares your information when you use our service. BY USING VIBESWIPE, YOU ACCEPT AND AGREE TO THIS
             PRIVACY POLICY IN ITS ENTIRETY. IF YOU DO NOT AGREE TO THIS PRIVACY POLICY, DO NOT USE THE SERVICE.
           </p>
 
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
             OF YOUR INFORMATION. You transmit any information to us at your own risk.
           </p>
 
-          <h2 className="text-xl font-semibold mb-4">8. Children's Privacy</h2>
+          <h2 className="text-xl font-semibold mb-4">8. Children’s Privacy</h2>
           <p className="mb-6">
             The Service is not intended for use by children under the age of 13. We do not knowingly collect information from children under 13. If you become aware that a child has provided us with
             personal information, please contact us.
