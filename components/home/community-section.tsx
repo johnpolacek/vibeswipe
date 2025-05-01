@@ -1,5 +1,6 @@
 import { FaDiscord, FaReddit } from "react-icons/fa"
 import { Heading } from "../typography/heading"
+import { Sparkles } from "lucide-react"
 
 export function CommunitySection() {
   return (
@@ -29,10 +30,14 @@ export function CommunitySection() {
           href="https://x.com/vibecodeparty"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 px-8 py-2 bg-black ring-1 ring-white/10 text-white rounded-md hover:opacity-90 transition-opacity"
+          className="flex items-center gap-3 px-6 py-2 bg-black ring ring-white/10 text-white rounded-md hover:opacity-90 transition-opacity"
         >
           <span className="text-xl">𝕏 </span>
           Follow
+        </a>
+        <a href="https://vibecode.party" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity">
+          <Sparkles className="w-5 h-5" />
+          Party
         </a>
       </div>
     </section>
