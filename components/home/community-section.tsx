@@ -5,7 +5,7 @@ export function CommunitySection() {
   return (
     <section className="container flex items-center justify-center flex-col gap-4 py-8 sm:py-16">
       <Heading variant="h3">Vibecoding Community</Heading>
-      <p className="text-gray-700 mb-4">At vibecode.party, we’re all about coders, creators, and AI enthusiasts building cool stuff together and learning from each other.</p>
+      <p className="mb-4">At vibecode.party, we’re all about coders, creators, and AI enthusiasts building cool stuff together and learning from each other.</p>
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12">
         <a
           href="https://discord.gg/vibecode"
